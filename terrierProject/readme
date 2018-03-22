@@ -1,0 +1,24 @@
+#readme
+
+bunch of instructions i found/made
+
+setting up trec
+
+Run the script 'convertXMLtoTREC.py'
+
+
+
+./bin/trec_setup.sh /Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/output
+
+./bin/trec_terrier.sh -i
+
+
+
+Run queries:
+
+./bin/interactive_terrier.sh 
+
+
+
+Use the java project to do the query expansions
+	
