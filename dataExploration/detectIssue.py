@@ -35,7 +35,7 @@ for subdir, dirs, files in os.walk(directory):
 		budget_count = 0
 		for line in text:
 			austerity_count += len(re.findall("[Aa]uster\w*", line))
-			budget_count += len(re.findall("[Bb]udget\w*", line))
+			#budget_count += len(re.findall("[Bb]udget\w*", line))
 		austerity.append(austerity_count)
 		budget.append(budget_count)
 #print budget

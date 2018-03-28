@@ -1,3 +1,7 @@
+"""
+Work in reading speeches by prime ministers 
+"""
+
 from unidecode import unidecode
 from bs4 import BeautifulSoup
 
