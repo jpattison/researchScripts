@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class query {
 
-    public static void main(String [ ] args) {
+    public static void main(String[] args) {
 
         System.setProperty("terrier.home", "/Users/jeremypattison/LargeDocument/ResearchProjectData/terrier-core-4.2/");
 
@@ -27,7 +27,7 @@ public class query {
         System.out.println("We have indexed " + index.getCollectionStatistics().getNumberOfDocuments() + " documents");
         Manager queryingManager = new Manager(index);
         SearchRequest srq = queryingManager.newSearchRequestFromQuery("austerity");
-        srq.addMatchingModel("Matching","BM25");
+        srq.addMatchingModel("Matching", "BM25");
 
         //srq.setControl("start", sStart)
         srq.setControl("qe", "on");
@@ -36,18 +36,27 @@ public class query {
         queryingManager.runPostProcessing(srq);
         queryingManager.runPostFilters(srq);
 
-
         QueryExpansion qexpan = new QueryExpansion();
         qexpan.process(queryingManager, srq);
+        printQueryExpansion(qexpan);
+
 
 
 //		queryingManager.runSearchRequest(srq);
 //		ResultSet results = srq.getResultSet();
 //		String[] displayKeys = results.getMetaKeys();
+
+        //System.out.print(qexpan.lastExpandedQuery);
+
+
+    }
+
+
+    public static void printQueryExpansion(QueryExpansion qexpan) {
         System.out.println("Now split stuff\n");
         String expansion = qexpan.lastExpandedQuery;
         String[] withScores = expansion.split("[\\s]");
-        Map<String,Float> exp_words = new HashMap<String, Float>();
+        Map<String, Float> exp_words = new HashMap<String, Float>();
 
         System.out.println(withScores.length);
         for (String temp : withScores) {
@@ -61,9 +70,6 @@ public class query {
         for (String key : exp_words.keySet()) {
             System.out.println(key);
         }
-        //System.out.print(qexpan.lastExpandedQuery);
-
-
     }
 }
 
