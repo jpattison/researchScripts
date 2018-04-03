@@ -5,33 +5,29 @@ Done:
 1) Read old hansard
 2) Build regex counter 
 3) create polymorphic solution for old hansard
-
+4) Same for new
 
 TODO:
 
-4) Same for new
+
 5) Export as JSON
 6) Seperate new between question and other time
 7) Seperate old
+8) Merge new and old reader
 
 """
 
 import os
 import re
-from unidecode import unidecode
 import xml.etree.ElementTree as ET
+from datetime import datetime
 
+import freq
 
 HANSARD_LOCATION = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard"
 
 
-def remove_non_ascii(text):
 
-    #print(text)
-
-    if text:
-        return unidecode(text)
-    return None
 
 
 def getDebateText(current, element):
@@ -54,34 +50,17 @@ def freqAggregator(listOfDics):
             output[key] += dic[key]
     return output
 
-def getRegFrequency(text, regInfos):
-    # regInfo must be of from [ [description,regexPattern], ..... [description,regexPattern]]
-    output = {}
-    
-
-    for description, regPattern in regInfos:
-
-        #print speech
-        matches = regPattern.findall(text)
-        if matches is None:
-            frequency = 0
-        else:
-            frequency = len(matches)
-
-        if description in output:
-            raise ValueError("duplicate description detected : {0}".format(description))
-        
-        output[description] = frequency
-    return output
 
 
 
-def readHansard(yearStart, yearEnd, oldReader, newReader, freqCounter, *args):
+
+def readHansard(startString, endString, oldReader, newReader, freqCounter, *args):
     """
     note last year not inclusive
 
     """
-
+    yearStart =int(startString)
+    yearEnd = int(endString)
 
     if(yearStart < 1998 or yearEnd > 2018 or yearStart>=yearEnd):
         raise ValueError("year out of range")
@@ -97,7 +76,7 @@ def readHansard(yearStart, yearEnd, oldReader, newReader, freqCounter, *args):
     for folder in folders:
         input_directory = HANSARD_LOCATION+"/{0}".format(folder)
         for filename in os.listdir(input_directory):
-            if not '.xml'in filename:
+            if not '.xml' in filename or len(filename)>14: # find neater way probably regex
                 continue
 
             file_path = input_directory+'/'+filename
@@ -105,38 +84,34 @@ def readHansard(yearStart, yearEnd, oldReader, newReader, freqCounter, *args):
             tree = ET.parse(input_file)
             root = tree.getroot()    
             
-            frequencyList = [] # list of dictonaries for individual speeches
             
             if filename in output and filename != "2011":
                 raise ValueError("duplicate name detected : {0}".format(filename))
 
-            if folder == "2011_before_april" or int(folder)>2011:
+            if folder == "2011_before_april" or int(folder)<2011:
+                #print "old reader"
+
                 text = oldReader(root)
             else:
                 text = newReader(root)
 
             
-            print filename
+
             freq = freqCounter(text, *args)
 
+            # use date in format of dd/mm/yy as key, need to parse and translate the date
 
-            # due to two 2011 folders we need to make sure they are combined
-            if folder == "2011_before_april":
-                combined = [freq]
-                if "2011" in output:
-                    combined.append(output["2011"])
-                frequencyCombined = freqAggregator(frequencyList)
-                output["2011"] = frequencyCombined   
+            stringDate = filename[:-4] #by removing last 4 we end up with the dates in YYYY-mm-dd
+            date = datetime.strptime(stringDate, '%Y-%m-%d')
+            keyword = date.strftime('%d-%m-%Y')
+            
+            if keyword in output:
+                raise ValueError("duplicate name detected : {0}".format(filename))
+            
 
-            elif folder == "2011" and "2011" in output:
-                combined = [output["2011"], freq]
-                frequencyCombined = freqAggregator(frequencyList)
-                output["2011"] = frequencyCombined                 
+            output[keyword] = freq 
 
-            else:
-                output[filename] = freq
 
-            frequencyCombined = freqAggregator(frequencyList)
             
     return output
 
@@ -153,7 +128,7 @@ def newReader(root):
         text = getDebateText('', para)
         text = re.sub('(\s|$|\n)+',' ',text)
 
-        output += remove_non_ascii(text)
+        output += freq.remove_non_ascii(text)
 
     return output
 
@@ -170,20 +145,24 @@ def oldReader(root):
         text = getDebateText('', para)
         text = re.sub('(\s|$)+',' ',text)
 
-        output += remove_non_ascii(text)
+        output += freq.remove_non_ascii(text)
 
     return output
 
 
-ausDescription = "checking for austerity"
-ausRegex = re.compile('[Aa]usterity')
+# ausDescription = "checking for austerity"
+# ausRegex = re.compile('[Aa]usterity')
 
-budDescription = "checking for budget"
-budRegex = re.compile('[Bb]udget')
+# budDescription = "checking for budget"
+# budRegex = re.compile('[Bb]udget')
 
-budCutDescription = "checking for budget cuts"
-budCutRegex = re.compile('[Bb]udget.{0,20}cut')
+# budCutDescription = "checking for budget cuts"
+# budCutRegex = re.compile('[Bb]udget.{0,20}cut')
 
-regList = [[ausDescription, ausRegex], [budDescription, budRegex], [budCutDescription, budCutRegex]]
-print readHansard(2010,2012, oldReader, newReader, getRegFrequency, regList)
+# regList = [[ausDescription, ausRegex], [budDescription, budRegex], [budCutDescription, budCutRegex]]
+# frequencies =  readHansard("2010","2012", oldReader, newReader,freq.getRegFrequency, regList)
 
+
+# organised = freq.oraganiseByKeyword(frequencies)
+
+# print freq.aggregateByMonth(organised)
