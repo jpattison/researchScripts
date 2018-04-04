@@ -10,6 +10,7 @@ Run the script 'convertXMLtoTREC.py'
 
 ./bin/trec_setup.sh /Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/output
 
+make empty folder index in var
 ./bin/trec_terrier.sh -i
 
 
