@@ -16,8 +16,8 @@ def singleDocumentToText(fileLocation, isNew):
     text = ""
     for element in textArray:
         text += element
-    text = re.sub('[\s\n\r]+',' ',text)
-
+    #text = re.sub('[\s\n\r]+',' ',text)
+    text = hansardReading.returnOnlyText(text)
 
     return text
 

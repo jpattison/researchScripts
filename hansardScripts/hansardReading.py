@@ -71,3 +71,15 @@ def remove_non_ascii(text):
         return unidecode(text)
     return None
     #return unidecode(unicode(text, encoding = "utf-8"))
+
+
+def returnOnlyText(text):
+
+    output = ""
+
+    for i in text:
+        if i.isalpha():
+            output+=i
+        else:
+            output += " "
+    return output
