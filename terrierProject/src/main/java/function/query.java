@@ -14,6 +14,8 @@ import org.terrier.structures.indexing.Indexer;
 import org.terrier.structures.indexing.classical.BasicIndexer;
 import org.terrier.utility.ApplicationSetup;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,26 +29,26 @@ public class query {
 
         //Collection coll = new TRECCollection("C:\\Users\\Jeremy\\Documents\\ResearchProjectData\\house_hansard\\2014");
         // NOte note entirely sure about above, i dont think we're really using it properly
-//        Indexer indexer = new BasicIndexer("/Users/jeremypattison/LargeDocument/ResearchProjectData/terrier-core-4.2/var/index", "data");
-//        Index index = IndexOnDisk.createIndex("/Users/jeremypattison/LargeDocument/ResearchProjectData/terrier-core-4.2/var/index", "data");
-//        System.out.println("We have indexed " + index.getCollectionStatistics().getNumberOfDocuments() + " documents");
+        Indexer indexer = new BasicIndexer("/Users/jeremypattison/LargeDocument/ResearchProjectData/terrier-core-4.2/var/index", "data");
+        Index index = IndexOnDisk.createIndex("/Users/jeremypattison/LargeDocument/ResearchProjectData/terrier-core-4.2/var/index", "data");
+        System.out.println("We have indexed " + index.getCollectionStatistics().getNumberOfDocuments() + " documents");
 
 
-        // Directory containing files to index
-        String aDirectoryToIndex = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/output/";
-
-        // Configure Terrier
-        ApplicationSetup.setProperty("indexer.meta.forward.keys", "filename");
-        ApplicationSetup.setProperty("indexer.meta.forward.keylens", "200");
-
-        Indexer indexer = new BasicIndexer("/Users/jeremypattison/LargeDocument/ResearchProjectData/terrier-core-4.2/var/autoIndex", "data");
-        //Collection coll = new SimpleFileCollection(Arrays.asList(aDirectoryToIndex), true);
-
-        Collection coll = new TRECCollection(); //Arrays.asList(aDirectoryToIndex), true);
-        indexer.index(new Collection[]{coll});
-        //indexer.close();
-
-        Index index = Index.createIndex("/Users/jeremypattison/LargeDocument/ResearchProjectData/terrier-core-4.2/var/autoIndex", "data");
+//        // Directory containing files to index
+//        String aDirectoryToIndex = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/output/";
+//
+//        // Configure Terrier
+//        ApplicationSetup.setProperty("indexer.meta.forward.keys", "filename");
+//        ApplicationSetup.setProperty("indexer.meta.forward.keylens", "200");
+//
+//        Indexer indexer = new BasicIndexer("/Users/jeremypattison/LargeDocument/ResearchProjectData/terrier-core-4.2/var/autoIndex", "data");
+//        //Collection coll = new SimpleFileCollection(Arrays.asList(aDirectoryToIndex), true);
+//
+//        Collection coll = new TRECCollection(); //Arrays.asList(aDirectoryToIndex), true);
+//        indexer.index(new Collection[]{coll});
+//        //indexer.close();
+//
+//        Index index = Index.createIndex("/Users/jeremypattison/LargeDocument/ResearchProjectData/terrier-core-4.2/var/autoIndex", "data");
 
         MetaIndex metaIndex = index.getMetaIndex();
 
@@ -57,7 +59,27 @@ public class query {
 
 
         Manager queryingManager = new Manager(index);
-        SearchRequest srq = queryingManager.newSearchRequestFromQuery("austerity");
+
+//        String fileLocation = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/textSnippits/2014-05-14.txt";
+//
+        String everything = "austerity";
+//
+//        try(BufferedReader br = new BufferedReader(new FileReader(fileLocation))) {
+//            StringBuilder sb = new StringBuilder();
+//            String line = br.readLine();
+//
+//            while (line != null) {
+//                sb.append(line);
+//                sb.append(System.lineSeparator());
+//                line = br.readLine();
+//            }
+//            everything = sb.toString();
+//        }
+
+
+
+
+        SearchRequest srq = queryingManager.newSearchRequestFromQuery(everything);
         srq.addMatchingModel("Matching", "BM25");
 
         //srq.setControl("start", sStart)
@@ -106,7 +128,9 @@ public class query {
         for (int i =0; i< results.getResultSize(); i++) {
             int docid = results.getDocids()[i];
             double score = results.getScores()[i];
-            System.out.println("   Rank "+i+": "+docid+" "+metaIndex.getItem("filename", docid)+" "+score);
+//            System.out.println("   Rank "+i+": "+docid+" "+metaIndex.getItem("filename", docid)+" "+score);
+            System.out.println("   Rank "+i+": "+docid+" "+metaIndex.getItem("docno", docid)+" "+score);
+
         }
 
     }

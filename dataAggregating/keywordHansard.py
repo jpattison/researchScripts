@@ -97,7 +97,7 @@ def readHansard(startString, endString, oldReader, newReader, freqCounter, *args
 
             
 
-            freq = freqCounter(text, *args)
+            freqCount = freqCounter(text, *args)
 
             # use date in format of dd/mm/yy as key, need to parse and translate the date
 
@@ -109,7 +109,7 @@ def readHansard(startString, endString, oldReader, newReader, freqCounter, *args
                 raise ValueError("duplicate name detected : {0}".format(filename))
             
 
-            output[keyword] = freq 
+            output[keyword] = freqCount
 
 
             
