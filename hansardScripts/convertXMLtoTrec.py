@@ -88,5 +88,5 @@ newFolders = [str(x) for x in range(2011,2018)]
 # convert_hansard(oldFolders, readOldPara)
 # convert_hansard(newFolders, readNewPara)
 
-convert_hansard(oldFolders, readOldText)
-convert_hansard(newFolders, readNewText)
+convert_hansard(oldFolders, hansardReading.readOldText)
+convert_hansard(newFolders, hansardReading.readNewText)

@@ -4,10 +4,14 @@ from unidecode import unidecode
 
 
 # two following are to return the entire text as single string
+
+
+
 def readOldText(root):
     output = ""
     for para in root.iter('para'):
         ascii_text = remove_non_ascii(para.text)
+        ascii_text = returnSentences(ascii_text)
         if ascii_text:
             output += " " + ascii_text
 
@@ -17,13 +21,13 @@ def readNewText(root):
     output = ""
     for para in root.iter('talk.text'):     
         text = getDebateText('', para)
-        text = re.sub('[\s]+',' ',text)
+        #text = re.sub('[\s]+',' ',text)
 
         ascii_text = remove_non_ascii(text)
+        ascii_text = returnSentences(ascii_text)
         
         if ascii_text:
             output += " " + ascii_text
-
     return [output]
 
 
@@ -76,10 +80,27 @@ def remove_non_ascii(text):
 def returnOnlyText(text):
 
     output = ""
-
+    if not text:
+        return output
     for i in text:
         if i.isalpha():
-            output+=i
+            output+=i.lower()
         else:
             output += " "
     return output
+
+def returnSentences(text):
+    output = ""
+    if not text:
+        return output
+    for i in text:
+        if i.isalpha():
+            output+=i.lower()
+        elif i==" " or i.isdigit():
+            output += i
+        else:
+            output += ". "
+    output = re.sub('(\s\.){2,}',' ',output)
+    output = re.sub('(\s){2,}',' ', output)
+    return output
+

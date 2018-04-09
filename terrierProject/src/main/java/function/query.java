@@ -60,10 +60,10 @@ public class query {
 
         Manager queryingManager = new Manager(index);
 
-//        String fileLocation = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/textSnippits/2014-05-14.txt";
+        String fileLocation = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/textSnippits/2014-05-14.txt";
 //
-        String everything = "austerity";
-//
+        String everything = "the austerity is killing the country";
+
 //        try(BufferedReader br = new BufferedReader(new FileReader(fileLocation))) {
 //            StringBuilder sb = new StringBuilder();
 //            String line = br.readLine();
@@ -83,6 +83,8 @@ public class query {
         srq.addMatchingModel("Matching", "BM25");
 
         //srq.setControl("start", sStart)
+
+
         srq.setControl("qe", "on");
         queryingManager.runPreProcessing(srq);
         queryingManager.runMatching(srq);
