@@ -20,6 +20,22 @@ def singleDocumentToText(fileLocation, isNew):
     text = hansardReading.returnOnlyText(text)
     return text
 
+
+def singleDocumentToNormalised(fileLocation, isNew):
+    input_file = open(fileLocation)
+    tree = ET.parse(input_file)
+    if isNew:
+        textArray = hansardReading.readNewText(tree.getroot())
+    else:
+        textArray = hansardReading.readOldText(tree.getroot())
+
+    text = ""
+    for element in textArray:
+        text += element
+    #text = re.sub('[\s\n\r]+',' ',text)
+    text = hansardReading.returnNormalised(text)
+    return text    
+
 def get_BOW(text):
     BOW = {}
     for word in text:
@@ -30,7 +46,7 @@ def get_BOW(text):
 
 
 def convertFolders(folders, isNew):
-    outputDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/bow/"
+    outputDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/bowNormalised/"
     if not os.path.exists(outputDirectory):
         os.makedirs(outputDirectory)
 
@@ -45,7 +61,7 @@ def convertFolders(folders, isNew):
             date = split[0]
             fileLocation = input_directory+'/'+filename
 
-            text = singleDocumentToText(fileLocation, isNew).split(' ')
+            text = singleDocumentToNormalised(fileLocation, isNew).split(' ')
             bow = get_BOW(text)
             outputFileDirectory = outputDirectory+date+".json"
             outputFile = open(outputFileDirectory, 'w')
@@ -55,7 +71,7 @@ def convertFolders(folders, isNew):
 
 oldFolders = [str(x) for x in range(1998,2011)] 
 oldFolders.append('2011_before_april')
-newFolders = [str(x) for x ifn range(2011,2018)] 
+newFolders = [str(x) for x in range(2011,2018)] 
 
 convertFolders(oldFolders, False)
 convertFolders(newFolders, True)

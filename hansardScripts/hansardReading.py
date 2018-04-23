@@ -1,10 +1,11 @@
 import re
 import xml.etree.ElementTree as ET
 from unidecode import unidecode
-
-
+from cucco import Cucco
+from string import digits
+import nltk
 # two following are to return the entire text as single string
-
+nltkWords = set(nltk.corpus.words.words())
 
 
 def readOldText(root):
@@ -88,6 +89,16 @@ def returnOnlyText(text):
         else:
             output += " "
     return output
+
+def returnNormalised(text):
+    cucco = Cucco()
+    textNormalised = cucco.normalize(text)
+    #digitsRemoved = textNormalised.translate(None, digits)
+    digitsRemoved = re.sub(r'\d+', '', textNormalised)
+    normalised = " ".join(w for w in nltk.wordpunct_tokenize(digitsRemoved) \
+         if w.lower() in nltkWords)
+    return normalised
+
 
 def returnSentences(text):
     output = ""
