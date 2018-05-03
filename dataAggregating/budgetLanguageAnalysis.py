@@ -1,7 +1,17 @@
+"""
+
+Relates to running language analysis on hansard speeches
+
+1) Code for single budget vs rest via KLdivergence
+2) Same but cosine
+3) Sort of a loop for method 1 but iterate through all
+"""
+
+
 import json
 import cosineComparison
 import graphs
-bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/bowNormalised/"
+bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/bowNormalised2/"
 
 
 budget2017 = ["2017-05-09.json","2017-05-10.json","2017-05-11.json"]
@@ -33,23 +43,49 @@ budget2005 = ["2005-05-10.json", "2005-05-11.json", "2005-05-12.json"]
 budgets = [budget2005, budget2006, budget2007, budget2008, budget2009, budget2010, budget2011, budget2012, budget2013, \
   budget2014, budget2015, budget2016, budget2017]
 
-referenceBudget = budget2008
 
-budgets.remove(referenceBudget)
+budgetList = [(budget2005, "budget2005"), (budget2006, "budget2006 Howard Last"), 
+(budget2007, "budget2007 Rudd First"), (budget2008, "budget2008"), (budget2011, "budget2011 Gillard first"), (budget2013, "budget2013 gillard last"),
+(budget2014, "budget2014"), (budget2017, "budget2017")]
+
+
+
+def createGraph(referenceBudget, yearAsString):
+
+
+    referenceBudget = budget2006
+    budgets.remove(referenceBudget)
+
+    # budgets = [budget[0] for budget in budgetList]
+    # names = [[budget[1] for budget in budgetList]]
+    reference, documents = cosineComparison.arrayToBow(budgets, bowDirectory)
+
+    _, queryBow = cosineComparison.arrayToBow([referenceBudget], bowDirectory)
+
+
+    matrix, query = cosineComparison.matrixQueryNoTransformation(documents, queryBow[0])
+
+    #print matrix
+    scores = cosineComparison.inverseKLdivergence(query, matrix, reference) #jointEntropy
+
+    values = [pair[1] for pair in scores]
+    xAxis = [pair[0][0:4] for pair in scores]
+
+    graphs.makeGraph(xAxis, "scores", "budget log for {0}".format(yearAsString), values)
+
+
+
+
 # note should i be oing TFIDF stuff or keep it pure?
 
 
 # This does the languaguage analysis based on cosine method
 
 # k = 100
-
 # reference, documents = cosineComparison.arrayToBow(budgets, bowDirectory)
-
 # _, queryBow = cosineComparison.arrayToBow([referenceBudget], bowDirectory)
-
 # #matrix, query = cosineComparison.calculateComparison(documents, queryBow, k)
 # matrix, query = cosineComparison.matrixQueryNoTransformation(documents, queryBow[0])
-
 
 # #scores = cosineComparison.scoreDocuments(query, matrix, reference) # cosine
 # scores = cosineComparison.inverseKLdivergence(query, matrix, reference) #jointEntropy
@@ -64,6 +100,8 @@ budgets.remove(referenceBudget)
 # budgetList = [(budget2005, "budget2005"), (budget2006, "budget2006 Howard Last"), 
 # (budget2007, "budget2007 Rudd First"), (budget2008, "budget2008"), (budget2011, "budget2011 Gillard first"), (budget2013, "budget2013 gillard last"),
 # (budget2014, "budget2014"), (budget2017, "budget2017")]
+
+
 
 # for budgetPair in budgetList:
 #     budgets = [budget2005, budget2006, budget2007, budget2008, budget2009, budget2010, budget2011, budget2012, budget2013, \
@@ -90,31 +128,28 @@ budgets.remove(referenceBudget)
 #     graphs.makeGraph(xAxis, "scores", "budget log for {0}".format(name), values, name)
 
 
-_, pBow = cosineComparison.arrayToBow([budget2014], bowDirectory)
-_, qBow = cosineComparison.arrayToBow([budget2013], bowDirectory)
-
-pBow, qBow = pBow[0], qBow[0]
-
-klWords, missing = cosineComparison.KLdivergenceWords(pBow, qBow)
-
-klWords = klWords.items()
-
-klWords.sort(key=lambda x: x[1])
-
-# print klWords[0:100]
-# print("\n")
-for wordPair in klWords[-100:]:
-    word = wordPair[0]
-    print("Word: {0} 2014: {1} 2013: {2}".format(word, pBow[word], qBow[word]))
-
-# print "now lowest \n \n"
-# for wordPair in klWords[0:100]:
-#     word = wordPair[0]
-#     print("Word: {0} P: {1} Q: {2}".format(word, pBow[word], qBow[word]))
 
 
+# compare KL for words between two years
+def KLdivergence(pBudget, qBudget, pName, qName):
+    _, pBow = cosineComparison.arrayToBow([pBudget], bowDirectory)
+    _, qBow = cosineComparison.arrayToBow([qBudget], bowDirectory)
 
-# missing = missing.items()
-# missing.sort(key=lambda x: x[1], reverse=True)
-# print("\n\n")
-# print missing[0:100]
+    pBow, qBow = pBow[0], qBow[0]
+
+    klWords, missing = cosineComparison.KLdivergenceWords(pBow, qBow)
+
+    klWords = klWords.items()
+
+    klWords.sort(key=lambda x: x[1])
+
+
+    for wordPair in klWords[-100:]:
+        word = wordPair[0]
+        print("Word: {0} {3}: {1} {4}: {2}".format(word, pBow[word], qBow[word], pName, qName))
+
+#createGraph(budget2010, "2010") 
+
+KLdivergence(budget2014, budget2006, "2014", "2006")
+
+

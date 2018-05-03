@@ -109,8 +109,7 @@ def inverseKLdivergence(query, matrix, reference):
     sumQuery = sum(query)
     count = 0
 
-    print len(matrix)
-
+    #print len(matrix)
     for column in matrix:
         summation = 0
         length = len(column)
