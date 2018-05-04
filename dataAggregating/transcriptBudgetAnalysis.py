@@ -5,6 +5,10 @@ import cosineComparison
 import graphs
 import transcriptHandler
 
+"""
+If I'm doing a call on the transcripts. It should be called from here
+
+"""
 
 bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/PMSpeeches/budgetBOW"
 
@@ -115,7 +119,40 @@ def KlPmTranscripts(dataset, queryTranscript, queryName, reference):
     values = [pair[1] for pair in scores]
     graphs.makeGraph(xAxis, "scores", "transcript budget log for {0}".format(queryName), values, queryName)
 
-queryTranscript, dataset, reference = \
-    transcriptHandler.getTranscripts(2010, 2015, 2015, None, True,["before"])
 
-KlPmTranscripts(dataset, queryTranscript, "2015", reference)
+
+
+def cosineTranscripts(dataset, queryTranscript, queryName, reference, k):
+    matrix, query = cosineComparison.calculateComparison(dataset, queryTranscript, k)
+    scores = cosineComparison.scoreDocuments(query, matrix, reference)
+
+    xAxis = [pair[0] for pair in scores]
+    values = [pair[1] for pair in scores]
+    graphs.makeGraph(xAxis, "scores", "Transcript Cosine. Reference = {0} K = {1}".\
+        format(queryName,k), values)
+
+# This does the languaguage analysis based on cosine method
+
+# k = 100
+# reference, documents = cosineComparison.arrayToBow(budgets, bowDirectory)
+# _, queryBow = cosineComparison.arrayToBow([referenceBudget], bowDirectory)
+# #matrix, query = cosineComparison.calculateComparison(documents, queryBow, k)
+# matrix, query = cosineComparison.matrixQueryNoTransformation(documents, queryBow[0])
+
+# #scores = cosineComparison.scoreDocuments(query, matrix, reference) # cosine
+# scores = cosineComparison.inverseKLdivergence(query, matrix, reference) #jointEntropy
+
+# xAxis = [pair[0][0:4] for pair in scores]
+# values = [pair[1] for pair in scores]
+# print scores
+
+
+# graphs.makeGraph(xAxis, "scores", "budget comparison. Reference = 2006", values)
+
+queryTranscript, dataset, reference = \
+    transcriptHandler.getTranscripts(2005, 2015, 2014, None, True, ["after"])
+
+#KlPmTranscripts(dataset, queryTranscript, "2015", reference)
+cosineTranscripts(dataset, queryTranscript, "2014", reference, 1000)
+
+

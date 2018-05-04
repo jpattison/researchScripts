@@ -72,7 +72,10 @@ def getTranscripts(initialYear, finalYear, queryYear, mediaTypes, justBudgets = 
         if justBudgets:
 
             category = assignCategory(tranDate, 4)
-            if not category in budgetCategories:
+
+            if category == "N/A":
+                continue
+            if budgetCategories and not category in budgetCategories:
                 
                 continue
 
@@ -95,8 +98,8 @@ def getTranscripts(initialYear, finalYear, queryYear, mediaTypes, justBudgets = 
     if queryYear <= finalYear and queryYear >= initialYear:
         pos = queryYear - initialYear
         dataset.pop(pos)
-        for year in range(queryYear +1,finalYear):
-            reference[pos] = pos+1
+        for year in range(queryYear,finalYear):
+            reference[pos] = reference[pos+1]
             pos = pos+1
         reference.pop(pos)
 

@@ -16,7 +16,7 @@ def makeGraph(xAxis, yLabel, title, values, context=None):
     #plt.yticks(np.arange(0.05, -2, step=0.2))
 
     axes = plt.gca()
-    axes.set_ylim([-1,0])
+    #axes.set_ylim([-1,0])
     #plt.yscale('log',basey=2) 
     #plt.savefig("/Users/jeremypattison/LargeDocument/graphs/{0}".format(context))
     plt.show()

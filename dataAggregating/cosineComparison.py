@@ -15,63 +15,63 @@ import numpy as np
 import graphs
 import math
 
-def folderToBow(folder):
-    reference = {} 
-    i = 0
-    documents = []
-    for filename in os.listdir(folder):
-        split = str(filename).split('.')
-        extension = split[-1].lower()
-        date = split[0]
-        if extension != 'json':
-            continue
+# def folderToBow(folder):
+#     reference = {} 
+#     i = 0
+#     documents = []
+#     for filename in os.listdir(folder):
+#         split = str(filename).split('.')
+#         extension = split[-1].lower()
+#         date = split[0]
+#         if extension != 'json':
+#             continue
 
-        filePath = folder+'/'+filename
-        inputFile = open(filePath)
-        bow = json.loads(inputFile.readline())
-        documents.append(bow)
-        reference[i]=date
-        i +=1
-    return reference, documents
-    vectorizer = DictVectorizer()
-    matrix = vectorizer.fit_transform(documents)
-    return reference, matrix, vectorizer
+#         filePath = folder+'/'+filename
+#         inputFile = open(filePath)
+#         bow = json.loads(inputFile.readline())
+#         documents.append(bow)
+#         reference[i]=date
+#         i +=1
+#     return reference, documents
+#     vectorizer = DictVectorizer()
+#     matrix = vectorizer.fit_transform(documents)
+#     return reference, matrix, vectorizer
 
-def arrayToBow(docArray, folder=None):
-    # same as folderToBow but assumes a list of lists for documents
-    # if multiple documents in same inner list then merge. But like by putting individual we can easily just use as a singular as well
-    documents = []
-    i = 0
-    reference = {}
-    for docSet in docArray:
-        doc = {}
-        name = None
-        for filename in docSet:
-            if name == None:
-                name = filename
-                reference[i]=name
-                i+=1
-            if folder:
-                tempFile = open(folder+filename)
-            else:
-                tempFile = open(filename)
+# def arrayToBow(docArray, folder=None):
+#     # same as folderToBow but assumes a list of lists for documents
+#     # if multiple documents in same inner list then merge. But like by putting individual we can easily just use as a singular as well
+#     documents = []
+#     i = 0
+#     reference = {}
+#     for docSet in docArray:
+#         doc = {}
+#         name = None
+#         for filename in docSet:
+#             if name == None:
+#                 name = filename
+#                 reference[i]=name
+#                 i+=1
+#             if folder:
+#                 tempFile = open(folder+filename)
+#             else:
+#                 tempFile = open(filename)
             
-            bow = json.loads(tempFile.readline())
+#             bow = json.loads(tempFile.readline())
 
-            for key in bow:
-                if key in doc:
-                    doc[key] += bow[key]
-                else:
-                    doc[key] = bow[key]
-        documents.append(doc)
-    return reference, documents
+#             for key in bow:
+#                 if key in doc:
+#                     doc[key] += bow[key]
+#                 else:
+#                     doc[key] = bow[key]
+#         documents.append(doc)
+#     return reference, documents
 
 
 
-def fileToBow(fileLocation):
-    file = open(fileLocation)
-    bow = json.loads(file.readline())
-    return bow
+# def fileToBow(fileLocation):
+#     file = open(fileLocation)
+#     bow = json.loads(file.readline())
+#     return bow
 
 # def performTfidf(matrix):
 #   transformer = TfidfTransformer(smooth_idf=False,norm=None)
@@ -99,7 +99,7 @@ def scoreDocuments(query, matrix, reference):
         #     print matrix[i]
         #     print score
     #print results
-    results.sort(key=lambda x: x[1])
+    #results.sort(key=lambda x: x[1])
     return results
 
 def inverseKLdivergence(query, matrix, reference):
@@ -108,6 +108,7 @@ def inverseKLdivergence(query, matrix, reference):
     results = []
     sumQuery = sum(query)
     count = 0
+
 
     #print len(matrix)
     for column in matrix:
@@ -123,7 +124,7 @@ def inverseKLdivergence(query, matrix, reference):
             #print tProb
             #print query[i]
             #print column[i]
-            summation += pBow * math.log(qBow/pBow,2) #should be negative but for graph make positive
+            summation -= pBow * math.log(qBow/pBow,2) 
         #summation += 1 # avoiding the log0 error
 
         name = reference[count]
