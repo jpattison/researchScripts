@@ -102,9 +102,8 @@ def scoreDocuments(query, matrix, reference):
     #results.sort(key=lambda x: x[1])
     return results
 
-def inverseKLdivergence(query, matrix, reference):
+def KLdivergence(query, matrix, reference):
     #https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence
-    # to allow log scale we've flipped it and added 1 to all scores
     results = []
     sumQuery = sum(query)
     count = 0
@@ -112,7 +111,7 @@ def inverseKLdivergence(query, matrix, reference):
 
     #print len(matrix)
     for column in matrix:
-        summation = 0
+        summation = 0.0
         length = len(column)
         sumCompared = sum(column)
         for i in range(0,len(column)):
@@ -133,7 +132,30 @@ def inverseKLdivergence(query, matrix, reference):
     #results.sort(key=lambda x: x[1])
     return results
 
+def KLbow(queryBow, dataBow):
+    # if we have two bag of words and want to know the KL without
+    # doing vector stuff
+
+    sumQuery = 0
+    sumData = 0
+    summation = 0.0
+    for key in queryBow:
+        sumQuery += queryBow[key]
+    for key in dataBow:
+        sumData += dataBow[key]
+
+    result = 0.0
+    for key in queryBow:
+        if not key in dataBow:
+            continue
+        qBow = queryBow[key] * 1.0 / sumQuery
+        pBow = dataBow[key] * 1.0 / sumData
+        summation -= pBow * math.log(qBow/pBow,2)
+    return summation
+
 def KLdivergenceWords(qBow, pBow):
+    # like note this is probably wrong :p 
+
     # return the contribution to KL score by word. Used for helping identify word normalisation
 
     words = {} #kl for each word in pBow

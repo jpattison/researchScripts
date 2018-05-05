@@ -47,11 +47,8 @@ def mergeDic(dicArray):
 def getTranscripts(initialYear, finalYear, queryYear, mediaTypes, justBudgets = False, budgetCategories =[], source=bowDirectory):
 
     # ideally we need to make an object of conditions that is passed for both query and reference.
-
     queryTranscripts = [] # the query.
-
     yearBreadth = finalYear - initialYear +1
-
     listofBowYears = [list() for i in range(yearBreadth)] # the datasert
     reference = {}
 
@@ -104,6 +101,50 @@ def getTranscripts(initialYear, finalYear, queryYear, mediaTypes, justBudgets = 
         reference.pop(pos)
 
     return queryTranscript, dataset, reference
+
+def splitByCategory(initialYear, finalYear, mediaTypes, dayBuff=4, source=bowDirectory):
+    # dictionary of dictionary. Year => Category = BOW
+    #yearBreadth = finalYear - initialYear +1
+    bowYears = {} # for each key (year) is list list of raw bow
+
+    for filename in os.listdir(source):
+        filepath = source + "/" + filename
+        file = open(filepath)
+        transcriptDic = json.loads(file.readline())
+        dateString = transcriptDic["data-release-date"]
+        tranType = transcriptDic["data-release-type"]
+        tranDate = datetime.strptime(dateString, '%d/%m/%Y')
+        year = tranDate.year
+        day = tranDate.day
+
+        if mediaTypes and not tranType in mediaTypes:
+            continue
+        if year>finalYear or year <initialYear:
+            continue
+        category = assignCategory(tranDate, dayBuff)
+        if category=="N/A":
+            continue
+        # at this point we assume data is valid
+
+        if not year in bowYears:
+            bowYears[year] = {}
+        if not category in bowYears[year]:
+            bowYears[year][category] = []      
+        bowYears[year][category].append(transcriptDic["BOW"])
+
+        #print transcriptDic["BOW"]
+        #bowYears[year].append(transcriptDic["BOW"])
+
+    dataset = {}
+    #print bowYears[2010].keys()
+    
+    for year in bowYears:
+        dataset[year]={}
+        for category in bowYears[year]:
+            dataset[year][category] = mergeDic(bowYears[year][category])
+
+    return dataset
+
 
 
 

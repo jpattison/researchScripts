@@ -110,7 +110,7 @@ def KlPmTranscripts(dataset, queryTranscript, queryName, reference):
     matrix, query = cosineComparison.matrixQueryNoTransformation(dataset, queryTranscript)
 
     #print(matrix)
-    scores = cosineComparison.inverseKLdivergence(query, matrix, reference) #jointEntropy
+    scores = cosineComparison.KLdivergence(query, matrix, reference) #jointEntropy
     scores.sort(key=lambda x: x[0])
 
     print scores
@@ -131,28 +131,47 @@ def cosineTranscripts(dataset, queryTranscript, queryName, reference, k):
     graphs.makeGraph(xAxis, "scores", "Transcript Cosine. Reference = {0} K = {1}".\
         format(queryName,k), values)
 
-# This does the languaguage analysis based on cosine method
 
-# k = 100
-# reference, documents = cosineComparison.arrayToBow(budgets, bowDirectory)
-# _, queryBow = cosineComparison.arrayToBow([referenceBudget], bowDirectory)
-# #matrix, query = cosineComparison.calculateComparison(documents, queryBow, k)
-# matrix, query = cosineComparison.matrixQueryNoTransformation(documents, queryBow[0])
+def KlWithinYear(initialYear, finalYear, mediaTypes = None, dayBuff = 4):
+    # returns a list of lists + reference
+    # query is before budget. First value is KL during, second is after
+    splitBy = transcriptHandler.splitByCategory(initialYear, finalYear, mediaTypes, dayBuff)
+    results = []
+    years = []
+    keys = []
+    for year in sorted(splitBy.keys()):
+        key = []
+        key.append("during")
+        key.append("after")
+        if not "before" in splitBy[year]:
+            print("Error: no before to base off. Deal with")
+            print year
+        years.append(str(year))
+        #print splitBy[year]["during"]
+        before = splitBy[year]["before"]
+        during = splitBy[year]["during"]
+        after = splitBy[year]["after"]
+        # before = transcriptHandler.mergeDic(beforeSet)
+        # during = transcriptHandler.mergeDic(duringSet)
+        # after = transcriptHandler.mergeDic(afterSet)
 
-# #scores = cosineComparison.scoreDocuments(query, matrix, reference) # cosine
-# scores = cosineComparison.inverseKLdivergence(query, matrix, reference) #jointEntropy
+        duringKL = cosineComparison.KLbow(before, during)
+        afterKL = cosineComparison.KLbow(before, after)
+        results.append([duringKL, afterKL])
 
-# xAxis = [pair[0][0:4] for pair in scores]
-# values = [pair[1] for pair in scores]
-# print scores
-
-
-# graphs.makeGraph(xAxis, "scores", "budget comparison. Reference = 2006", values)
+        keys.append(key)
+    return results, years, keys
 
 queryTranscript, dataset, reference = \
     transcriptHandler.getTranscripts(2005, 2015, 2014, None, True, ["after"])
 
 #KlPmTranscripts(dataset, queryTranscript, "2015", reference)
-cosineTranscripts(dataset, queryTranscript, "2014", reference, 1000)
+#cosineTranscripts(dataset, queryTranscript, "2014", reference, 1000)
 
+
+results, years, keys= KlWithinYear(2005, 2015)
+
+print results
+
+graphs.setSubplots(keys, years, "KL Before", results )
 

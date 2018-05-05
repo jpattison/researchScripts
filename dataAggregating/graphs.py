@@ -20,3 +20,15 @@ def makeGraph(xAxis, yLabel, title, values, context=None):
     #plt.yscale('log',basey=2) 
     #plt.savefig("/Users/jeremypattison/LargeDocument/graphs/{0}".format(context))
     plt.show()
+
+
+def setSubplots(xAxes, yLabels, title, yValues):
+
+    n = len(xAxes)
+    plt.title(title)
+
+    for i in range(n):
+        plt.subplot(n, 1, i+1)
+        plt.bar(xAxes[i], yValues[i])
+        plt.ylabel(yLabels[i])
+    plt.show()
