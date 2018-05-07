@@ -115,6 +115,7 @@ def returnNormalised(text):
 
 
 def returnSentences(text):
+    # RETURNS NORMALISED SENTENCE BY REGEX. BAD
     # appears to be nearly identicle to return only text except for a silly attempt of removing additoinal spacing
     # returns only letters and digits in lowercase format. 
     # all other characters removed
@@ -131,6 +132,32 @@ def returnSentences(text):
     output = re.sub('(\s\.){2,}',' ',output)
     output = re.sub('(\s){2,}',' ', output)
     return output
+
+def oldToSentences(root):
+    # Using NTLK convert root to list of sentences
+    # remove most punctuation as well
+    output = ""
+    for para in root.iter('para'):
+        ascii_text = remove_non_ascii(para.text)
+        if ascii_text:
+            output += ascii_text
+    return returnSemiPureSentence(output)
+
+def newToSentences(root):  
+    output = ""
+    for para in root.iter('talk.text'):     
+        text = getDebateText('', para)
+
+        output += remove_non_ascii(text)
+
+    return returnSemiPureSentence(output)
+
+def returnSemiPureSentence(text):
+    # keep letters/digits/ [,.'!()%[]$]
+    output = re.sub('[^\w\s\$\"\'\.\,\!\(\)%]', ' ', text)
+    output = re.sub('\t|\n|\s{2,}', ' ', output)
+    return nltk.tokenize.sent_tokenize(output)
+    
 
 def keepCommonText(text):
     # remove all words that start with capital letter (except start sentence) or have punctuations

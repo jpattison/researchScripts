@@ -46,7 +46,8 @@ budgetList = [(budget2005, "budget2005"), (budget2006, "budget2006 Howard Last")
 
 budgetList = [(budget2005, 2005), (budget2006, 2006), 
 (budget2007, 2007), (budget2008, 2008), (budget2009, 2009),
-(budget2010, 2010), (budget2011, 2011), (budget2013, 2013),
+(budget2010, 2010), (budget2011, 2011), (budget2012, 2012),
+(budget2013, 2013),
 (budget2014, 2014), (budget2015, 2015), (budget2016, 2016),
 (budget2017, 2017)]
 
@@ -59,9 +60,9 @@ def getHansardBudgets(initialYear, finalYear, queryYear, source=bowDirectory):
     years = [el[1] for el in budgetList]
     yearPos = years.index(queryYear)
     queryList = budgetList[yearPos][0]
-    print queryList
+    #print queryList
 
-    budgetList.pop(yearPos)
+    #budgetList.pop(yearPos)
 
     budgetReduced = [] # ones within specific years
     for pair in budgetList:

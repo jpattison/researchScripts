@@ -12,9 +12,10 @@ def cosineHansard(dataset, queryTranscript, queryName, reference, k):
     graphs.makeGraph(xAxis, "scores", "Hansard Cosine. Reference = {0} K = {1}".\
         format(queryName,k), values)
 
+queryYear = 2005
 
 queryTranscript, dataset, reference = \
-    hansardHandler.getHansardBudgets(2005, 2017, 2015)
+    hansardHandler.getHansardBudgets(2005, 2017, queryYear)
 
-cosineHansard(dataset, queryTranscript, "2015", reference, 1000)
+cosineHansard(dataset, queryTranscript, str(queryYear), reference, 1000)
 

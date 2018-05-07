@@ -182,7 +182,6 @@ def convertStemmedFolders(folders, isNew):
             text = hansardReading.stemParagraph(text)
             bow = paraToBow(text)
 
-
             outputFileDirectory = outputDirectory+date+".json"
             outputFile = open(outputFileDirectory, 'w')
             json.dump(bow, outputFile)
