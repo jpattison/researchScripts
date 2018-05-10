@@ -102,6 +102,8 @@ def getTranscripts(initialYear, finalYear, queryYear, mediaTypes, justBudgets = 
 
     return queryTranscript, dataset, reference
 
+
+
 def splitByCategory(initialYear, finalYear, mediaTypes, dayBuff=4, source=bowDirectory):
     # dictionary of dictionary. Year => Category = BOW
     #yearBreadth = finalYear - initialYear +1
@@ -146,5 +148,57 @@ def splitByCategory(initialYear, finalYear, mediaTypes, dayBuff=4, source=bowDir
     return dataset
 
 
+def getDistribution(initialYear, finalYear, mediaTypes = None, justBudgets = False, source=bowDirectory):
+    # for providing the distributions of transcripts for that year
+
+    yearBreadth = finalYear - initialYear +1
+    listofBowYears = [list() for i in range(yearBreadth)] # the datasert
+    output = {}
+
+    for filename in os.listdir(source):
+        filepath = source + "/" + filename
+        file = open(filepath)
+        transcriptDic = json.loads(file.readline())
+        dateString = transcriptDic["data-release-date"]
+        tranType = transcriptDic["data-release-type"]
+        tranDate = datetime.strptime(dateString, '%d/%m/%Y')
+        year = tranDate.year
+        day = tranDate.day
+
+        if mediaTypes and not tranType in mediaTypes:
+            continue
+
+        if justBudgets:
+
+            category = assignCategory(tranDate, 4)
+
+            if category == "N/A":
+                continue
+        
+        if year <= finalYear and year >= initialYear:
+            if not year in output:
+                output[year] = {}
 
 
+            if justBudgets:
+                if not tranType in output[year]:
+                    output[year][tranType] = {}
+                if not category in output[year][tranType]:
+                    output[year][tranType][category] = 0
+                output[year][tranType][category] += 1
+            else:
+                if not tranType in output[year]:
+                    output[year][tranType] = 0
+                output[year][tranType] +=1
+    return output
+
+# t= getDistribution(2005, 2015, None, True)
+# for key in sorted(t.keys()):
+#     print "\n"
+#     print key
+#     for mtype in sorted(t[key].keys()):
+#         print ""
+#         print mtype
+#         for ctype in ["before", "during", "after"]:
+#             if ctype in t[key][mtype]:
+#                 print("{0} : {1}".format(ctype, t[key][mtype][ctype]))

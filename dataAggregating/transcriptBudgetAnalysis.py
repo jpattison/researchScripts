@@ -13,6 +13,9 @@ If I'm doing a call on the transcripts. It should be called from here
 bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/PMSpeeches/budgetBOW"
 
 
+
+
+
 def checkDistribution():
 ### This code is for checking distributions of the data for specific categories
 
@@ -143,6 +146,8 @@ def KlWithinYear(initialYear, finalYear, mediaTypes = None, dayBuff = 4):
         key = []
         key.append("during")
         key.append("after")
+        key.append("duringVafter")
+
         if not "before" in splitBy[year]:
             print("Error: no before to base off. Deal with")
             print year
@@ -157,21 +162,66 @@ def KlWithinYear(initialYear, finalYear, mediaTypes = None, dayBuff = 4):
 
         duringKL = cosineComparison.KLbow(before, during)
         afterKL = cosineComparison.KLbow(before, after)
-        results.append([duringKL, afterKL])
+        duringAfter = cosineComparison.KLbow(during, after)
 
+        results.append([duringKL, afterKL, duringAfter])
         keys.append(key)
     return results, years, keys
 
-queryTranscript, dataset, reference = \
-    transcriptHandler.getTranscripts(2005, 2015, 2014, None, True, ["after"])
 
-#KlPmTranscripts(dataset, queryTranscript, "2015", reference)
-#cosineTranscripts(dataset, queryTranscript, "2014", reference, 1000)
+def cosineWithinYear(initialYear, finalYear, mediaTypes = None, dayBuff = 4):
+    # returns a list of lists + reference
+    # query is before budget. First value is KL during, second is after
+    splitBy = transcriptHandler.splitByCategory(initialYear, finalYear, mediaTypes, dayBuff)
+    results = []
+    years = []
+    keys = []
+    for year in sorted(splitBy.keys()):
+        key = []
+        key.append("during")
+        key.append("after")
+        key.append("duringVafter")
+        if not "before" in splitBy[year]:
+            print("Error: no before to base off. Deal with")
+            print year
+        years.append(str(year))
+        #print splitBy[year]["during"]
+        before = splitBy[year]["before"]
+        during = splitBy[year]["during"]
+        after = splitBy[year]["after"]
+        # before = transcriptHandler.mergeDic(beforeSet)
+        # during = transcriptHandler.mergeDic(duringSet)
+        # after = transcriptHandler.mergeDic(afterSet)
+
+        duringCo = cosineComparison.cosineBOW(before, during)
+        afterCo = cosineComparison.cosineBOW(before, after)
+        duringAfter = cosineComparison.cosineBOW(during, after)
+        results.append([duringCo, afterCo, duringAfter])
+
+        keys.append(key)
+    #print keys
+    return results, years, keys
 
 
-results, years, keys= KlWithinYear(2005, 2015)
 
+#2005To2009
+
+# refYear = 2016
+# queryTranscript, dataset, reference = \
+#     transcriptHandler.getTranscripts(2005, 2015, refYear, None, True, None)
+
+# KlPmTranscripts(dataset, queryTranscript, str(refYear), reference)
+#cosineTranscripts(dataset, queryTranscript, str(refYear), reference, None)
+
+#2005, 2006, 2007, 2008, 2010, 2013, 2014, 2015, 2016, 2017
+
+results, years, keys= KlWithinYear(2010, 2015)
+#results, years, keys= cosineWithinYear(2010, 2015)
+
+# print results
 print results
-
 graphs.setSubplots(keys, years, "KL Before", results )
+
+
+#cosine2010To2015
 

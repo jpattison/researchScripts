@@ -5,6 +5,8 @@ Output should generally be bag of words of corpus, query and a reference
 
 """
 
+from datetime import timedelta, date
+
 bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/bowNormalised2/"
 
 
@@ -53,6 +55,26 @@ budgetList = [(budget2005, 2005), (budget2006, 2006),
 
 # I suppose the basic would be convert an entire year into single bag of words and use that
 #def getHansard(initialYear, finalYear, queryYear, source=bowDirectory)
+
+def daterange(start_date, end_date ):
+    for n in range(1 + int ((end_date - start_date).days)):
+        yield start_date + timedelta(n)
+
+
+
+
+
+def withinDates(initialDate, finalDate, bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/bowNormalised2/"):
+    # assume in date format
+    output = []
+    for single_date in daterange(initialDate, finalDate):
+        filename = single_date.strftime("%Y-%m-%d") + ".json"
+        filepath = bowDirectory+filename
+        if os.path.isfile(filepath):
+            output.append(filename)
+
+    return output
+
 
 
 # only cares about the budgets

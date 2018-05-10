@@ -153,6 +153,21 @@ def KLbow(queryBow, dataBow):
         summation -= pBow * math.log(qBow/pBow,2)
     return summation
 
+def cosineBOW(queryBow, dataBow):
+    # two bag of words.
+    #Just do cosine comparison, no TFIDF or anything
+    #matrix, query = calculateComparison(bowReference, bowQuery, None)
+    
+    vectorizer = DictVectorizer()
+    
+    data = vectorizer.fit_transform(dataBow).toarray()
+    query = vectorizer.transform(queryBow).toarray()
+
+    # print data
+    # print "inbetween2 \n"
+    # print query
+    return cos_distance(query, data)
+
 def KLdivergenceWords(qBow, pBow):
     # like note this is probably wrong :p 
 
@@ -197,12 +212,22 @@ def calculateComparison(bowReference, bowQuery, k):
     vectorizer = DictVectorizer()
     matrix = vectorizer.fit_transform(bowReference)
     
+
     transformer = TfidfTransformer(smooth_idf=False,norm=None)
-    svd = TruncatedSVD(n_components=k)
 
     matrix = transformer.fit_transform(matrix) 
-    matrix = svd.fit_transform(matrix)
-    query = transform_query(svd, transformer, bowQuery, vectorizer)
+
+    if k:
+        svd = TruncatedSVD(n_components=k)
+        matrix = svd.fit_transform(matrix)
+        query = transform_query(svd, transformer, bowQuery, vectorizer)
+    else:
+        matrix = matrix.toarray()
+        query = transformer.transform(vectorizer.transform(bowQuery)).toarray()[0]
+    # print "query"
+    # print len(query)
+    # print "matrix"
+    # print len(matrix)
 
     return matrix, query
 
