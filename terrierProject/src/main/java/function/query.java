@@ -60,9 +60,13 @@ public class query {
 
         Manager queryingManager = new Manager(index);
 
-        String fileLocation = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/textSnippits/2014-05-14.txt";
+
+
+        //String fileLocation = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/textSnippits/2014-05-14.txt";
 //
-        String everything = "the austerity is killing the country";
+        String everything = "to collect and assemble the information requested would be a major task for my and statutory and other bodies under my portfolio and am not prepared to ask them to commit the considerable human resources required to obtain the information to answer these questions";
+
+//        String everything = "to collect and assemble ";
 
 //        try(BufferedReader br = new BufferedReader(new FileReader(fileLocation))) {
 //            StringBuilder sb = new StringBuilder();
