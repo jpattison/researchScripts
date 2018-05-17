@@ -114,24 +114,25 @@ def returnOnlyText(text):
 #     return normalised
 
 
-# def returnSentences(text):
-#     # RETURNS NORMALISED SENTENCE BY REGEX. BAD
-#     # appears to be nearly identicle to return only text except for a silly attempt of removing additoinal spacing
-#     # returns only letters and digits in lowercase format. 
-#     # all other characters removed
-#     output = ""
-#     if not text:
-#         return output
-#     for i in text:
-#         if i.isalpha():
-#             output+=i.lower()
-#         elif i==" " or i.isdigit():
-#             output += i
-#         else:
-#             output += ". "
-#     output = re.sub('(\s\.){2,}',' ',output)
-#     output = re.sub('(\s){2,}',' ', output)
-#     return output
+def returnSentences(text):
+    # RETURNS NORMALISED SENTENCE BY REGEX. BAD
+    # appears to be nearly identicle to return only text except for a silly attempt of removing additoinal spacing
+    # returns only letters and digits in lowercase format. 
+    # all other characters removed
+    # you probabluy want this removed
+    output = ""
+    if not text:
+        return output
+    for i in text:
+        if i.isalpha():
+            output+=i.lower()
+        elif i==" " or i.isdigit():
+            output += i
+        else:
+            output += ". "
+    output = re.sub('(\s\.){2,}',' ',output)
+    output = re.sub('(\s){2,}',' ', output)
+    return output
 
 def oldToSentences(root):
     # Using NTLK convert root to list of sentences

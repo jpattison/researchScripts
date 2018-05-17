@@ -5,7 +5,7 @@ Output should generally be bag of words of corpus, query and a reference
 
 """
 
-from datetime import timedelta, date
+from datetime import timedelta, date, datetime
 
 bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/bowNormalised2/"
 
@@ -88,6 +88,24 @@ def month_year_iter(start_month, start_year, end_month, end_year ):
         yield y, m+1
 
 
+def inbetweenDates(filename, budgetSession = False, budgetEstimates = False) :
+    # im using this for trec stuff
+    # for a given file, does it fall in a budget period
+
+    parts = filename.split('.')
+    fileDate = datetime.strptime(parts[0],"%Y-%m-%d").date() 
+    year = fileDate.year
+
+    if year in politicalCalandar:
+        if budgetSession:
+            (start, finish) = politicalCalandar[year]["budget"]
+            if fileDate>=start and fileDate<= finish:
+                return True
+        if budgetEstimates:
+            (start, finish) = politicalCalandar[year]["estimates"]
+            if fileDate>=start and fileDate<= finish:
+                return True   
+    return False         
 
 def withinDates(initialDate, finalDate, bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/bowNormalised2/"):
     # assume in date format
@@ -218,5 +236,7 @@ def arrayToBow(docArray, folder=None):
 def fileToBow(fileLocation):
     file = open(fileLocation)
     bow = json.loads(file.readline())
-    return bo
+    return bow
 
+
+ 
