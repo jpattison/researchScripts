@@ -102,36 +102,36 @@ def returnOnlyText(text):
             output += " "
     return output
 
-def returnNormalised(text):
-    # uses cucco to perform normalisation. All stop words are removed it deals with morphologies
-    # also remove wall digits
-    cucco = Cucco()
-    textNormalised = cucco.normalize(text)
-    #digitsRemoved = textNormalised.translate(None, digits)
-    digitsRemoved = re.sub(r'\d+', '', textNormalised)
-    normalised = " ".join(w for w in nltk.wordpunct_tokenize(digitsRemoved) \
-         if w.lower() in nltkWords)
-    return normalised
+# def returnNormalised(text):
+#     # uses cucco to perform normalisation. All stop words are removed it deals with morphologies
+#     # also remove wall digits
+#     cucco = Cucco()
+#     textNormalised = cucco.normalize(text)
+#     #digitsRemoved = textNormalised.translate(None, digits)
+#     digitsRemoved = re.sub(r'\d+', '', textNormalised)
+#     normalised = " ".join(w for w in nltk.wordpunct_tokenize(digitsRemoved) \
+#          if w.lower() in nltkWords)
+#     return normalised
 
 
-def returnSentences(text):
-    # RETURNS NORMALISED SENTENCE BY REGEX. BAD
-    # appears to be nearly identicle to return only text except for a silly attempt of removing additoinal spacing
-    # returns only letters and digits in lowercase format. 
-    # all other characters removed
-    output = ""
-    if not text:
-        return output
-    for i in text:
-        if i.isalpha():
-            output+=i.lower()
-        elif i==" " or i.isdigit():
-            output += i
-        else:
-            output += ". "
-    output = re.sub('(\s\.){2,}',' ',output)
-    output = re.sub('(\s){2,}',' ', output)
-    return output
+# def returnSentences(text):
+#     # RETURNS NORMALISED SENTENCE BY REGEX. BAD
+#     # appears to be nearly identicle to return only text except for a silly attempt of removing additoinal spacing
+#     # returns only letters and digits in lowercase format. 
+#     # all other characters removed
+#     output = ""
+#     if not text:
+#         return output
+#     for i in text:
+#         if i.isalpha():
+#             output+=i.lower()
+#         elif i==" " or i.isdigit():
+#             output += i
+#         else:
+#             output += ". "
+#     output = re.sub('(\s\.){2,}',' ',output)
+#     output = re.sub('(\s){2,}',' ', output)
+#     return output
 
 def oldToSentences(root):
     # Using NTLK convert root to list of sentences
@@ -159,16 +159,20 @@ def returnSemiPureSentence(text):
     return nltk.tokenize.sent_tokenize(output)
     
 
-def keepCommonText(text):
+def keepCommonText(text, removeStopWords=True):
     # remove all words that start with capital letter (except start sentence) or have punctuations
     # return in list of lists, each list is a sentence
+    #added remove stopwords an optional argument
     if not text:
         return []
 
     #print(text)
     output = []
 
-    global stop_words
+    if removeStopWords:
+        global stop_words
+    else:
+        stop_words = []
 
     text = remove_non_ascii(text)
     for sentence in nltk.tokenize.sent_tokenize(text):
@@ -197,7 +201,7 @@ def keepCommonText(text):
 
 
 
-def updatedReadOldText(root):
+def updatedReadOldText(root, removeStopWords = True):
     # a differnet version of text normalisation
     # approach is remove non capital words (except start of sentence)
     # and words with hyphens or other characters in it
@@ -205,7 +209,7 @@ def updatedReadOldText(root):
 
     sentences = [] # list of lists. Each list is a sentence
     for para in root.iter('para'):
-            normalised = keepCommonText(para.text)
+            normalised = keepCommonText(para.text, removeStopWords)
             if normalised:
                 sentences.extend(normalised)
 
