@@ -3,9 +3,11 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk import tokenize
 nltk.download('vader_lexicon')
 import json
+import hansardHandler
+import graphs
+sentenceLocation = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/sentences/"
 
-
-def sentStats(sentences, buffer):
+def sentStats(sentences):
     # for each sentence calculate the sentiment
     # return number of positive, negative and neutral
     # as well as total
@@ -42,18 +44,58 @@ def sentStats(sentences, buffer):
             output["numNeg"] += 1
         elif neu > neg and neu > pos:
             output["numNeu"] += 1
-        else:
-            print "error"
-            print ss
-            print sentence
-            print ""
+        # else:
+        #     print "error"
+        #     print ss
+        #     print sentence
+        #     print ""
     return output, investigate
 
-file = open("/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/sentences/2015-03-02.json")
-sentences = json.loads(file.readline())
+def compareSentiments(initYear, finalYear, source = sentenceLocation):
 
-output, investigate = sentStats(sentences, 0.5)
-print output
-print investigate["positive"]
-print "\n\n"
-print investigate["negative"]
+
+    years = [year for year in range(initYear, finalYear+1)]
+
+    # getBudgets(years, source, budgetSession = False, budgetEstimates = False, skipFirstDay = False)
+    files = hansardHandler.getBudgets(years, source, False, True, False)
+
+    counts = {}
+    counter = 0
+    print years
+    print files
+    for clump in files:
+        year = years[counter]
+        print year
+        counts[year] = {}
+        counts[year]["totPos"] = 0
+        counts[year]["totNeg"] = 0
+        counts[year]["total"] = 0
+        for filename in clump:
+            file = open(source+filename)
+            sentences = json.loads(file.readline())
+            counts[year]["total"]+=len(sentences)
+            tCounts, tInvestigate = sentStats(sentences)
+
+            counts[year]["totPos"] += tCounts["totPos"]
+            counts[year]["totNeg"] += tCounts["totNeg"]
+        counter += 1
+    
+    output = []
+    keys = []
+    for year in years:
+        keys.append(["percPos", "percNeg"])
+        temp = []
+        temp.append(counts[year]["totPos"]*1.0/counts[year]["total"])
+        temp.append(counts[year]["totNeg"]*1.0/counts[year]["total"])
+        output.append(temp)
+
+    return output, years, keys
+
+#budgetWeek2012To2017
+#budgetEstimates2012To2017
+#budgetSentiment
+results, years, keys= compareSentiments(2012, 2017)
+print results
+print years
+print keys
+graphs.setSubplots(keys, years, "Sentiment Hansard", results )
