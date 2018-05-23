@@ -88,14 +88,23 @@ def month_year_iter(start_month, start_year, end_month, end_year ):
         yield y, m+1
 
 
-def inbetweenDates(filename, budgetSession = False, budgetEstimates = False) :
+def inbetweenDates(filename, budgetSession = False, budgetEstimates = False, both=False) :
     # im using this for trec stuff
     # for a given file, does it fall in a budget period
 
-    parts = filename.split('.')
-    fileDate = datetime.strptime(parts[0],"%Y-%m-%d").date() 
+    if type(filename)==str:
+        parts = filename.split('.')
+        fileDate = datetime.strptime(parts[0],"%Y-%m-%d").date() 
+        
+    elif type(filename) == date:
+        fileDate = filename
+    elif type(filename) == datetime:
+        fileDate = filename.date()
+    else:
+        print "error"
+        print filename
+        print type(filename)
     year = fileDate.year
-
     if year in politicalCalandar:
         if budgetSession:
             (start, finish) = politicalCalandar[year]["budget"]
@@ -105,6 +114,12 @@ def inbetweenDates(filename, budgetSession = False, budgetEstimates = False) :
             (start, finish) = politicalCalandar[year]["estimates"]
             if fileDate>=start and fileDate<= finish:
                 return True   
+        if both:
+            # just return if its within
+            (start, _) = politicalCalandar[year]["budget"]
+            (_, finish) = politicalCalandar[year]["estimates"]
+            if fileDate>=start and fileDate<= finish:
+                return True               
     return False         
 
 def withinDates(initialDate, finalDate, bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/bowNormalised2/"):
@@ -138,6 +153,7 @@ def getBudgets(years, source, budgetSession = False, budgetEstimates = False, sk
 
 
 # only cares about the budgets
+# return bag of words of the budgets
 def budgetToBow(initialYear, finalYear, queryYear, budgetSession = False, budgetEstimates = False, skipFirstDay = False, source=bowDirectory):
     years = []
     for year in range(initialYear, finalYear +1):

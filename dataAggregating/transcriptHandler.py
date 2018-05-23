@@ -6,7 +6,7 @@ Idea. If we want to pull specific  information about transcripts in a format sim
 import os
 import json
 from datetime import datetime
-
+import hansardHandler
 bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/PMSpeeches/budgetBOW"
 
 budgetYear = {2005: {"start": 10, "end": 12}, 2006: {"start": 9, "end": 11}, 2007: {"start": 8, "end": 10},
@@ -45,7 +45,7 @@ def mergeDic(dicArray):
 
 
 def getTranscripts(initialYear, finalYear, queryYear, mediaTypes, justBudgets = False, budgetCategories =[], source=bowDirectory):
-
+    ### NOTE: use the alternate version for this if budgets
     # ideally we need to make an object of conditions that is passed for both query and reference.
     queryTranscripts = [] # the query.
     yearBreadth = finalYear - initialYear +1
@@ -146,6 +146,62 @@ def splitByCategory(initialYear, finalYear, mediaTypes, dayBuff=4, source=bowDir
             dataset[year][category] = mergeDic(bowYears[year][category])
 
     return dataset
+
+
+def getTranscriptsBudgetDateTechnique(initialYear, finalYear, queryYear, mediaTypes, 
+source=bowDirectory, budgetSession = False, budgetEstimates = False, both=False):
+    # this is similar to the above
+
+    queryTranscripts = [] # the query.
+    yearBreadth = finalYear - initialYear +1
+    listofBowYears = [list() for i in range(yearBreadth)] # the datasert
+    reference = {}
+
+    for filename in os.listdir(source):
+        filepath = source + "/" + filename
+        file = open(filepath)
+        transcriptDic = json.loads(file.readline())
+        dateString = transcriptDic["data-release-date"]
+        tranType = transcriptDic["data-release-type"]
+        tranDate = datetime.strptime(dateString, '%d/%m/%Y')
+        year = tranDate.year
+        day = tranDate.day
+
+
+        if mediaTypes and not tranType in mediaTypes:
+            
+            continue
+
+        if not hansardHandler.inbetweenDates(tranDate, budgetSession, budgetEstimates, both):
+
+            continue
+
+        if year == queryYear:
+            queryTranscripts.append(transcriptDic["BOW"])
+        
+        if year <= finalYear and year >= initialYear:
+            pos = year - initialYear
+
+            listofBowYears[pos].append(transcriptDic["BOW"])
+            reference[pos]=year
+
+    dataset = []
+    for budgetYear in listofBowYears:
+        dataset.append(mergeDic(budgetYear))
+
+    queryTranscript = mergeDic(queryTranscripts)
+    
+    # want to remove the queryData from the dataset
+    if queryYear <= finalYear and queryYear >= initialYear:
+        pos = queryYear - initialYear
+        dataset.pop(pos)
+        for year in range(queryYear,finalYear):
+            reference[pos] = reference[pos+1]
+            pos = pos+1
+        reference.pop(pos)
+
+    return queryTranscript, dataset, reference
+
 
 
 def getDistribution(initialYear, finalYear, mediaTypes = None, justBudgets = False, source=bowDirectory):

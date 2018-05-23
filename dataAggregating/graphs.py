@@ -13,15 +13,15 @@ def makeGraph(xAxis, yLabel, title, values, context=None):
     plt.xticks(y_pos, objects)
     plt.ylabel(yLabel)
     plt.title(title)
-    #plt.yscale('log',basey=2) 
+    plt.yscale('log',basey=2) 
 
     #plt.yticks([2e-2, 2e-1, 2e0])
     #plt.yticks(np.arange(0.05, -2, step=0.2))
 
     axes = plt.gca()
-    axes.set_ylim([0,1])
+    #axes.set_ylim([0,0.5])
 
-    #axes.set_ylim([2**-2,1])
+    axes.set_ylim([2**-4,1])
 
     #plt.savefig("/Users/jeremypattison/LargeDocument/graphs/{0}".format(context))
     plt.show()
