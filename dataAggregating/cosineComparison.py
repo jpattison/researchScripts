@@ -104,6 +104,7 @@ def scoreDocuments(query, matrix, reference):
 
 def KLdivergence(query, matrix, reference):
     #https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence
+
     results = []
     sumQuery = sum(query)
     count = 0
@@ -135,7 +136,7 @@ def KLdivergence(query, matrix, reference):
 def KLbow(queryBow, dataBow):
     # if we have two bag of words and want to know the KL without
     # doing vector stuff
-
+    # reference is dataBow
     sumQuery = 0
     sumData = 0
     summation = 0.0
@@ -170,7 +171,7 @@ def cosineBOW(queryBow, dataBow):
 
 def KLdivergenceWords(qBow, pBow):
     # like note this is probably wrong :p 
-
+    # I think pBow is the reference
     # return the contribution to KL score by word. Used for helping identify word normalisation
 
     words = {} #kl for each word in pBow

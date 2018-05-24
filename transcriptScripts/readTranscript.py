@@ -10,6 +10,11 @@ def normaliseTranscript(transcriptDic):
     transcriptDic["normalised"] = normalised
     return transcriptDic
 
+def normaliseAndStem(transcriptDic):
+    normaliseTranscript(transcriptDic)
+    transcriptDic["normalised"] = hansardReading.stemParagraph(transcriptDic["normalised"])
+    
+
 
 
 

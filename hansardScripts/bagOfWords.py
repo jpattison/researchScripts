@@ -66,6 +66,7 @@ def paraToBow(sentences):
 
     for sentence in sentences:
         for word in sentence:
+
             if not word in BOW:
                 BOW[word] = 0
             BOW[word] += 1
@@ -179,9 +180,15 @@ def convertStemmedFolders(folders, isNew):
             fileLocation = input_directory+'/'+filename
 
             text = getNormalisedDocument(fileLocation, isNew)
+            # print "\n\nInitial"
+            # print text[0:10]
             text = hansardReading.stemParagraph(text)
+            # print "\n\nStemmed"
+            # print text[0:10]
+            # print"\n\nBow"
             bow = paraToBow(text)
-
+            #print(bow)
+            #return
             outputFileDirectory = outputDirectory+date+".json"
             outputFile = open(outputFileDirectory, 'w')
             json.dump(bow, outputFile)

@@ -8,7 +8,9 @@ import os
 
 SPEECHLOCATION = "/Users/jeremypattison/LargeDocument/ResearchProjectData/PMSpeeches/2003to2015"
 
-output_directory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/PMSpeeches/budgetBOW"
+#output_directory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/PMSpeeches/budgetBOW"
+
+output_directory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/PMSpeeches/bowNormalisedStemmed"
 if not os.path.exists(output_directory):
     os.makedirs(output_directory)
 
@@ -25,31 +27,64 @@ def paraToBow(sentences):
             BOW[word] += 1
     return BOW
 
+def convertSpeeches(initYear, finYear, method, output_directory):
+    # method has to make a normalised document in "normalised"
+    for filename in os.listdir(SPEECHLOCATION):
+        fileMap = {}
+        split = str(filename).split('.')
+
+        if len(split) > 1 : # i.e. has a file extension
+            #print split
+            continue
+
+        file_path = SPEECHLOCATION+'/'+filename
+
+        transcriptDic = readTranscript.transcriptToDic(file_path)
+        year = transcriptDic["data-release-date"].year
+        if year <initYear or year > finYear:
+            continue
+        method(transcriptDic)
+
+        transcriptDic["BOW"] = paraToBow(transcriptDic["normalised"])
+
+        #print transcriptDic["BOW"]
+
+        output_path = output_directory+'/'+filename+'.json'
+        outputFile = open(output_path, 'w')
+
+        #datetime not serilizable so need to put into string
+        transcriptDic["data-release-date"] = transcriptDic["data-release-date"].strftime("%d/%m/%Y")
+        json.dump(transcriptDic, outputFile)
 
 
-for filename in os.listdir(SPEECHLOCATION):
-    fileMap = {}
-    split = str(filename).split('.')
+convertSpeeches(2005, 2010, readTranscript.normaliseAndStem, output_directory)
 
-    if len(split) > 1 : # i.e. has a file extension
-        #print split
-        continue
 
-    file_path = SPEECHLOCATION+'/'+filename
+# for filename in os.listdir(SPEECHLOCATION):
+#     fileMap = {}
+#     split = str(filename).split('.')
 
-    transcriptDic = readTranscript.transcriptToDic(file_path)
-    if transcriptDic["data-release-date"].month!=5:
-        continue
-    transcriptDic = readTranscript.normaliseTranscript(transcriptDic)
+#     if len(split) > 1 : # i.e. has a file extension
+#         #print split
+#         continue
 
-    transcriptDic["BOW"] = paraToBow(transcriptDic["normalised"])
+#     file_path = SPEECHLOCATION+'/'+filename
 
-    #print transcriptDic["BOW"]
+#     transcriptDic = readTranscript.transcriptToDic(file_path)
+#     if transcriptDic["data-release-date"].month!=5:
+#         continue
+#     transcriptDic = readTranscript.normaliseTranscript(transcriptDic)
 
-    output_path = output_directory+'/'+filename+'.json'
-    outputFile = open(output_path, 'w')
+#     transcriptDic["BOW"] = paraToBow(transcriptDic["normalised"])
 
-    #datetime not serilizable so need to put into string
-    transcriptDic["data-release-date"] = transcriptDic["data-release-date"].strftime("%d/%m/%Y")
-    json.dump(transcriptDic, outputFile)
+#     #print transcriptDic["BOW"]
+
+#     output_path = output_directory+'/'+filename+'.json'
+#     outputFile = open(output_path, 'w')
+
+#     #datetime not serilizable so need to put into string
+#     transcriptDic["data-release-date"] = transcriptDic["data-release-date"].strftime("%d/%m/%Y")
+#     json.dump(transcriptDic, outputFile)
+
+
 

@@ -4,48 +4,50 @@ Work in reading speeches by prime ministers
 
 from unidecode import unidecode
 from bs4 import BeautifulSoup
-
-
-
+import sys
+import os
+sys.path.insert(0, '/Users/jeremypattison/LargeDocument/scripts/transcriptScripts')
+import readTranscript
 
 
 def remove_non_ascii(text):
 
-	#print(text)
+    #print(text)
 
-	if text:
-		return unidecode(text)
-	return None
-	#return unidecode(unicode(text, encoding = "utf-8"))
-
-def readTranscript(filename):
-
-	input_file = open(filename)
-	soup = BeautifulSoup(input_file, 'html.parser')
-
-	dates = soup.find_all("span", {"class": "data-release-date"})
-
-	speech = soup.find_all("div", {"class": "transcript-body"})
-	for thing in dates:
-		print thing.text
-
-	for thing in speech:
-		print thing
-	# root = tree.getroot()
+    if text:
+        return unidecode(text)
+    return None
+    #return unidecode(unicode(text, encoding = "utf-8"))
 
 
-	# for para in root.iter('data-release-date'):
 
 
-	# 	text = para
-	# 	#text = getDebateText('', para)
-	# 	#text = re.sub('[\s]+',' ',text)
+def grabDistribution(inputDirectory):
+    # method has to make a normalised document in "normalised"
+    years = {}
+    count = 0
+    for filename in os.listdir(inputDirectory):
+        fileMap = {}
+        split = str(filename).split('.')
 
-	# 	ascii_text = remove_non_ascii(text)
-	# 	if ascii_text:
-	# 		print ascii_text
+        if len(split) > 1 : # i.e. has a file extension
+            #print split
+            continue
+        count +=1
+        if count%100==0:
+            print count
+        file_path = inputDirectory+'/'+filename
 
-		
+        transcriptDic = readTranscript.transcriptToDic(file_path)
+        year = transcriptDic["data-release-date"].year
+        if not year in years:
+            years[year] = 0
+        [year]+=1
+    print "cat"
+    print years
+        
+
+        
 
 
-readTranscript('/Users/jeremypattison/LargeDocument/PMSpeeches/xml/transcript-12317')
+grabDistribution('/Users/jeremypattison/LargeDocument/ResearchProjectData/PMSpeeches/xml/')
