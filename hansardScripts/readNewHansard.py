@@ -4,32 +4,34 @@ What Im trying to do here is see if we can group speeches by same people.
 I'll focus on making it just for the new budget format (post april 2011)
 
 
+Important functions:
+
+def groupByMp(input_file):
+
+def groupByParty(byMpDic):
+
+def bowSpeeches(lols):
+
+def bowByParty(speechByParty):
+
+def produceBowByParty(fileLocation):
+
+
+
 TODO:
 
 1) I don't think it is dealing with interjectinos
 2) We found a large error with not getting opening part of a speech. I think its fixed but should investigate
 3) I think we should be removing the non alpha characters here. Probably in normaliseText
+4) remove stuff from speaker
+
 
 """
 import xml.etree.ElementTree as ET
 import wNormalisation
 import re
 
-def normaliseText(paragraph):
-    # been given a list of strings. Want to perform some preformatting.
-    # Ideally this is where i remove non-alphanumeric characters and replace with a space
-    output = []
-    
-    #print "\n\n yet another"
-    #print paragraph
-    for sentence in paragraph:
-        if not sentence:
-            # is a Nothing object
-            continue
-        normalised = wNormalisation.convertToAscii(sentence)
-        normalised = re.sub('[\s]+',' ',normalised)
-        output.append(normalised)
-    return output
+
 
 
 def getTalkDetails(talkDic, talkStart):
@@ -74,7 +76,7 @@ def getTalkText(talkDic, talkText):
         #print texty.text
         speech.append(texty.text)
 
-    normalisedSpeech = normaliseText(speech)
+    normalisedSpeech = wNormalisation.normaliseText(speech)
     talkDic["speech"] = normalisedSpeech
 
 def readTalk(talk):

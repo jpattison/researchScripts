@@ -1,7 +1,8 @@
 import readNewHansard
+import readOldHansard
 import os
 import json
-def newBowToJSON(folders):
+def BowToJson(folders, modu):
 
 
     outputDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/byParty/bowNotNormalised/"
@@ -20,13 +21,20 @@ def newBowToJSON(folders):
             fileLocation = input_directory+'/'+filename
 
             print fileLocation
-            bow = readNewHansard.produceBowByParty(fileLocation)
+            bow = modu.produceBowByParty(fileLocation)
 
 
             outputFileDirectory = outputDirectory+date+".json"
             outputFile = open(outputFileDirectory, 'w')
             json.dump(bow, outputFile)
 
+oldFolders = [str(x) for x in range(1998,2011)] 
+oldFolders.append('2011_before_april')
+BowToJson(oldFolders, readOldHansard)
+
 
 newFolders = [str(x) for x in range(2011,2018)] 
-newBowToJSON(newFolders)
+BowToJson(newFolders, readNewHansard)
+
+
+

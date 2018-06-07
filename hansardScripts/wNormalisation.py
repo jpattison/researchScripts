@@ -14,12 +14,14 @@ ToDo:
 from unidecode import unidecode
 from nltk.tokenize import word_tokenize
 from nltk.tokenize import sent_tokenize
-
 import nltk
 nltkWords = set(nltk.corpus.words.words())
 from nltk.corpus import stopwords
 
 stop_words = set(stopwords.words('english'))
+
+import wNormalisation
+import re
 
 
 def convertToAscii(text):
@@ -93,4 +95,18 @@ def flattenList(lists):
     return output
 
 
-
+def normaliseText(paragraph):
+    # been given a list of strings. Want to perform some preformatting.
+    # Ideally this is where i remove non-alphanumeric characters and replace with a space
+    output = []
+    
+    #print "\n\n yet another"
+    #print paragraph
+    for sentence in paragraph:
+        if not sentence:
+            # is a Nothing object
+            continue
+        normalised = wNormalisation.convertToAscii(sentence)
+        normalised = re.sub('[\s]+',' ',normalised)
+        output.append(normalised)
+    return output
