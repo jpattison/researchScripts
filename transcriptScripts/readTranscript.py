@@ -2,17 +2,16 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 import sys
 sys.path.insert(0, '/Users/jeremypattison/LargeDocument/scripts/hansardScripts')
-import hansardReading
+import wNormalisation
 
-def normaliseTranscript(transcriptDic):
+def normaliseTranscript(transcriptDic, removeCapitals, stemWords):
     raw = transcriptDic["content"]
-    normalised = hansardReading.keepCommonText(raw)
-    transcriptDic["normalised"] = normalised
+    normalised = wNormalisation.normaliseString(raw)
+    sentences = wNormalisation.sentencesToNormalised(normalised, removeCapitals, stemWords)
+    transcriptDic["sentences"] = sentences
     return transcriptDic
 
-def normaliseAndStem(transcriptDic):
-    normaliseTranscript(transcriptDic)
-    transcriptDic["normalised"] = hansardReading.stemParagraph(transcriptDic["normalised"])
+
     
 
 

@@ -133,26 +133,58 @@ def KLdivergence(query, matrix, reference):
     #results.sort(key=lambda x: x[1])
     return results
 
-def KLbow(queryBow, dataBow):
-    # if we have two bag of words and want to know the KL without
-    # doing vector stuff
-    # reference is dataBow
-    sumQuery = 0
-    sumData = 0
-    summation = 0.0
-    for key in queryBow:
-        sumQuery += queryBow[key]
-    for key in dataBow:
-        sumData += dataBow[key]
 
-    result = 0.0
-    for key in queryBow:
-        if not key in dataBow:
-            continue
-        qBow = queryBow[key] * 1.0 / sumQuery
-        pBow = dataBow[key] * 1.0 / sumData
-        summation -= pBow * math.log(qBow/pBow,2)
-    return summation
+## this is our original. Trying to rewrite on 8June
+# def KLbow(queryBow, dataBow):
+#     # if we have two bag of words and want to know the KL without
+#     # doing vector stuff
+#     # reference is dataBow
+    
+#     sumQuery = 0
+#     sumData = 0
+#     summation = 0.0
+#     for key in queryBow:
+#         sumQuery += queryBow[key]
+#     for key in dataBow:
+#         sumData += dataBow[key]
+
+#     result = 0.0
+#     for key in queryBow:
+#         if not key in dataBow:
+#             continue
+#         qBow = queryBow[key] * 1.0 / sumQuery
+#         pBow = dataBow[key] * 1.0 / sumData
+#         summation -= pBow * math.log(qBow/pBow,2)
+#     return summation
+
+def calcSumBow(bow):
+    # return the total number of words
+    total = 0
+    for key in bow:
+        total += bow[key]
+    return total
+
+
+def KLbow(pBow, qBow):
+
+    # KL estimates the distribution difference. D(P|Q). Q DOES NOT stand for query, instead it is our base.
+
+    denP = calcSumBow(pBow) # denominator for P
+    denQ = calcSumBow(qBow) # denominator for Q
+
+    KL = 0.0
+
+    for word in pBow:
+        probP = pBow[word]*1.0/denP
+        if word not in qBow:
+            continue # we give it a value of 0 but this probably isn't a good assumption
+        probQ = qBow[word]*1.0/denQ
+        kInstance = probP * math.log(probP/probQ,2)
+        KL += kInstance
+    return KL
+
+
+
 
 def cosineBOW(queryBow, dataBow):
     # two bag of words.

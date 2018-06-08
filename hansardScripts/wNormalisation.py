@@ -24,33 +24,44 @@ import wNormalisation
 import re
 
 
+from nltk.stem.porter import *
+stemmer = PorterStemmer()
+
+
 def convertToAscii(text):
     # converts to ascii
     if text:
         return unidecode(text)
     return None
 
-def normaliseWord(word):
-    # return only letters and lowercase
-    word = word.lower()
-    output = ""
-    for letter in word:
-        if letter.isalpha():
-            output+=letter
+# def normaliseWord(word):
+#     # return only letters and lowercase
+#     word = word.lower()
+#     output = ""
+#     for letter in word:
+#         if letter.isalpha():
+#             output+=letter
 
+#     return output
+
+def getStemmed(words):
+    #given list of words. return the stemmed versions
+    global stemmer
+    output = []
+    for word in words:
+        output.append(stemmer.stem(word))
     return output
 
-
-def keepCommonWords(words):
+def removeStopWords(words):
     # assume input is simply a list of words. Want to keep normal words only
     # do i want to remove all capital words?
 
     output = []
     
     for word in words:
-        word = normaliseWord(word)
+        
 
-        if word in stop_words:
+        if len(word) <= 1 or word in stop_words:
             continue
         # if not word in nltkWords:
         #     print "removed " + word
@@ -68,18 +79,40 @@ def listToBOW(listOfWords, outDic):
         outDic[word] += 1
     return outDic
 
+def stripCapitalisedWords(words):
+    # remove all words that start with upper case except first
+    if len(words) <= 1:
+        return words
+    output = [words[0]]
+    for word in words[1:]:
+        if word[0].islower():
+            output.append(word)
+    return output
 
-
-
-def sentencesToNormalised(string):
-    # assume string, want output of words with normalisations
+def lowerCaseList(inputList):
     output = []
-    sentences = sent_tokenize(string)
+    for word in inputList:
+        output.append(word.lower())
+    return output
+
+def sentencesToNormalised(document, removeCapitals=False, stemWords = False):
+    # assume string with character normalisation already done.
+    # produces list of words broken by sentences
+    # normalisation is remove of stopwords and words length 1 such as "s" or "a'"
+    # optionally remove all capital words after first
+    output = []
+    sentences = sent_tokenize(document)
 
     for sentence in sentences:
         words = word_tokenize(sentence)
-        normalised = keepCommonWords(words)
-        output.append(normalised)
+        if removeCapitals:
+            words = stripCapitalisedWords(words)
+        words = removeStopWords(words)
+        words = lowerCaseList(words)
+        if stemWords:
+            words = getStemmed(words)
+
+        output.append(words)
     return output
 
 def flattenList(lists):
@@ -95,18 +128,45 @@ def flattenList(lists):
     return output
 
 
-def normaliseText(paragraph):
+def normaliseText(document):
     # been given a list of strings. Want to perform some preformatting.
-    # Ideally this is where i remove non-alphanumeric characters and replace with a space
+    # Normalisations:
+    # 1) Remove all nonalpha characters apart from sentence structure ones
+    # 2) convert to ascii
+    # 3) Remove excessive spaces but that shouldn't matter
     output = []
     
     #print "\n\n yet another"
-    #print paragraph
-    for sentence in paragraph:
-        if not sentence:
+    #print document
+    for subDocument in document:
+        if not subDocument:
             # is a Nothing object
             continue
-        normalised = wNormalisation.convertToAscii(sentence)
-        normalised = re.sub('[\s]+',' ',normalised)
+
+        #normalised = 
+        normalised = normaliseString(subDocument)
+        #normalised = re.sub('[\s]+',' ',normalised)
         output.append(normalised)
     return output
+
+def normaliseString(inputString):
+    # we're given a string that is likely a list of sentences. 
+    # I want to remove all nonalpha numeric characters but keep the fullstops
+    output = ""
+
+    inputString = convertToAscii(inputString) # turn to ascii
+    for sentence in sent_tokenize(inputString):
+        for word in word_tokenize(sentence):
+            #print word
+            for character in word:
+                if character.isalpha() or character in ".,!;":
+                    output += character
+                else:
+                    output += " "
+            output += " " # space bween words
+        #output += ". " # fullstop between sentence
+    
+    output = re.sub('[\s]+',' ',output)
+    return output
+
+

@@ -136,7 +136,7 @@ def groupByParty(byMpDic):
         byParty[party].extend(byMpDic[mp])
     return byParty
 
-def bowSpeeches(lols):
+def bowSpeeches(lols, removeCapitals, stemWords):
     # lols is assumed to be a list of lists of strings. Turn into a bow
 
     bow = {}
@@ -145,27 +145,27 @@ def bowSpeeches(lols):
     
     for paragraph in flatList:
         #note string might be multiple sentences
-        listOfSentences = wNormalisation.sentencesToNormalised(paragraph)
+        listOfSentences = wNormalisation.sentencesToNormalised(paragraph, removeCapitals, stemWords)
         for sentence in listOfSentences:
             wNormalisation.listToBOW(sentence, bow)
 
     return bow
 
-def bowByParty(speechByParty):
+def bowByParty(speechByParty,removeCapitals, stemWords):
     ### assumes we have a dictionary with list of lists of strings. want bag of words by party
     output = {}
     for key in speechByParty:
-        bow = bowSpeeches(speechByParty[key])
+        bow = bowSpeeches(speechByParty[key], removeCapitals, stemWords)
         output[key] = bow
     return output
 
 
 
-def produceBowByParty(fileLocation):
+def produceBowByParty(fileLocation, removeCapitals, stemWords):
     input_file = open(fileLocation)
     byMps = groupByMp(input_file)
     byParty = groupByParty(byMps)
-    bowParty = bowByParty(byParty)
+    bowParty = bowByParty(byParty, removeCapitals, stemWords)
     return bowParty
 
 

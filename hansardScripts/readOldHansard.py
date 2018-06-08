@@ -24,7 +24,8 @@ TODO:
 1) Remove stuff from speaker
 2) Theres a lot of inline stuff that will likely lead to things skipped
 3) Might need to double check the things im skipping.
-
+4) We have noticed quite a few incorreclty labelled speeches, this poses a problem if we overwrite a person if half their information is one person and other 
+ see id YU5 in 30th march 1998
 
 Special notes:
 1) Have removed interjections
@@ -77,11 +78,29 @@ def getTalkText(talkDic, talkText):
     talkDic["speech"] = normalisedSpeech
 
 
+def findNameId(individualSpeech, overallDic):
+    # sometimes we're given a name not an id
+    if "name.id" in individualSpeech:
+        return individualSpeech["name.id"]
+    elif "name" in individualSpeech:
+        individualName = individualSpeech["name"]
+        for mpId in overallDic:
+            if "name" in overallDic[mpId]["person"]:
+                mpName = overallDic[mpId]["person"]["name"]
+                if individualName == mpName:
+                    nameId = mpId
+                    print "fixed absent id"
+                    return nameId
+    else:
+        return None
+
 
 def attatchSpeechToMp(overallDic, individualSpeech):
+    nameId = findNameId(individualSpeech, overallDic)
 
-    nameId = individualSpeech["name.id"]
-
+    if not nameId:
+        print "no id found"
+        return
     # if not (name, nameId, party) in overallDic:
     #     overallDic[(name, nameId, party)] = []
 
@@ -94,10 +113,8 @@ def attatchSpeechToMp(overallDic, individualSpeech):
 
     #print attributes
     for attribute in attributes:
-        # print ""
-        # print attribute
-        #print overallDic[attribute]
-        overallDic[nameId]["person"][attribute] = individualSpeech[attribute]
+        if attribute not in overallDic[nameId]["person"]:
+            overallDic[nameId]["person"][attribute] = individualSpeech[attribute]
 
 
     overallDic[nameId]["speech"].append(individualSpeech["speech"])
@@ -130,17 +147,21 @@ def groupByParty(byMpDic):
 
     for nameId in byMpDic:
         nameId = fixNameId(nameId, byMpDic)
-        if not "party" in byMpDic[nameId]["person"]:
+        if nameId in ["YU5", "10000"] and not "party" in byMpDic[nameId]["person"]:
+            print "skipped " + nameId
+            continue
+
+        elif not "party" in byMpDic[nameId]["person"]:
             print "This person gonna break something"
             print byMpDic[nameId]["person"]
-            #continue
+            continue
         party = byMpDic[nameId]["person"]["party"]
         if not party in byParty:
             byParty[party] = []
         byParty[party].extend(byMpDic[nameId]["speech"])
     return byParty
 
-def bowSpeeches(lols):
+def bowSpeeches(lols, removeCapitals, stemWords):
     # lols is assumed to be a list of lists of strings. Turn into a bow
 
     bow = {}
@@ -149,31 +170,32 @@ def bowSpeeches(lols):
     
     for paragraph in flatList:
         #note string might be multiple sentences
-        listOfSentences = wNormalisation.sentencesToNormalised(paragraph)
+        listOfSentences = wNormalisation.sentencesToNormalised(paragraph, removeCapitals, stemWords)
         for sentence in listOfSentences:
             wNormalisation.listToBOW(sentence, bow)
 
     return bow
 
-def bowByParty(speechByParty):
+def bowByParty(speechByParty, removeCapitals, stemWords):
     ### assumes we have a dictionary with list of lists of strings. want bag of words by party
     output = {}
     for key in speechByParty:
-        bow = bowSpeeches(speechByParty[key])
+        bow = bowSpeeches(speechByParty[key], removeCapitals, stemWords)
         output[key] = bow
     return output
 
 
 
-def produceBowByParty(fileLocation):
+def produceBowByParty(fileLocation, removeCapitals, stemWords):
     input_file = open(fileLocation)
     byMps = groupByMp(input_file)
     byParty = groupByParty(byMps)
-    bowParty = bowByParty(byParty)
+    bowParty = bowByParty(byParty, removeCapitals, stemWords)
     return bowParty   
 
 
 def fixNameId(nameId, byMpDic):
+    # if we've been given a nameId that doesn't match to anyone
     if "party" in byMpDic[nameId]["person"]:
         return nameId
     # assume party isn't there. Might be misaligned id.
@@ -186,12 +208,11 @@ def fixNameId(nameId, byMpDic):
                 if name == mpName:
                     nameId = mpId
                     return nameId
-
-
     return nameId
 
 
-# fileLocation = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/2011_before_april/2011-03-02.xml"
+
+# fileLocation = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/1999/1999-06-22.xml"
 # print produceBowByParty(fileLocation)
 
 

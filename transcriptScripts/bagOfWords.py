@@ -45,7 +45,7 @@ def convertSpeeches(initYear, finYear, method, output_directory):
             continue
         method(transcriptDic)
 
-        transcriptDic["BOW"] = paraToBow(transcriptDic["normalised"])
+        transcriptDic["BOW"] = paraToBow(transcriptDic["sentences"])
 
         #print transcriptDic["BOW"]
 
@@ -57,7 +57,10 @@ def convertSpeeches(initYear, finYear, method, output_directory):
         json.dump(transcriptDic, outputFile)
 
 
-convertSpeeches(2005, 2010, readTranscript.normaliseAndStem, output_directory)
+def stemAndRemoveCapitals(transcriptDic):
+    return readTranscript.normaliseTranscript(transcriptDic, True, True)
+
+convertSpeeches(2010, 2010, stemAndRemoveCapitals, output_directory)
 
 
 # for filename in os.listdir(SPEECHLOCATION):

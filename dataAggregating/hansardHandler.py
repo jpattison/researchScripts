@@ -73,6 +73,28 @@ politicalCalandar = {
     }               
 }
 
+# set of dates of elections and who won. Starting at 1996. Idea is find the one previous election to find out who is in governmetn
+coalition = ["lp", "nats", "np", "nayswa", "npacting", "clp"]
+labor = ["alp"]
+
+
+electionCalander = [(date(1996, 03, 11), coalition), (date(2007, 12, 03), labor), (date(2013, 9, 18), coalition)]
+
+
+def partyInCharge(fileDate):
+    # return a list parties in charge given a date. Only works for dates post 1996
+    global electionCalander
+    parties = None
+    for (electionDate, electionWinner) in electionCalander:
+        if electionDate <= fileDate:
+            parties = electionWinner
+        else:
+            break
+    return parties
+
+
+
+
 # I suppose the basic would be convert an entire year into single bag of words and use that
 #def getHansard(initialYear, finalYear, queryYear, source=bowDirectory)
 
@@ -93,8 +115,8 @@ def inbetweenDates(filename, budgetSession = False, budgetEstimates = False, bot
     # for a given file, does it fall in a budget period
 
     if type(filename)==str:
-        parts = filename.split('.')
-        fileDate = datetime.strptime(parts[0],"%Y-%m-%d").date() 
+        fileDate = getFileDate(filename)
+
         
     elif type(filename) == date:
         fileDate = filename
@@ -154,18 +176,18 @@ def getBudgets(years, source, budgetSession = False, budgetEstimates = False, sk
 
 # only cares about the budgets
 # return bag of words of the budgets
-def budgetToBow(initialYear, finalYear, queryYear, budgetSession = False, budgetEstimates = False, skipFirstDay = False, source=bowDirectory):
+def budgetToBow(initialYear, finalYear, queryYear, partyFunction, budgetSession = False, budgetEstimates = False, skipFirstDay = False, source=bowDirectory):
     years = []
     for year in range(initialYear, finalYear +1):
         if year != queryYear:
             years.append(year)
     dataFiles = getBudgets(years, source, budgetSession, budgetEstimates, skipFirstDay)
 
-    reference, dataset = arrayToBow(dataFiles, source)
+    reference, dataset = arrayToBow(dataFiles, partyFunction, source)
     if queryYear :
         queryFiles = getBudgets([queryYear], source, budgetSession, budgetEstimates, skipFirstDay)
 
-        _, queryTranscript = arrayToBow(queryFiles, source)
+        _, queryTranscript = arrayToBow(queryFiles, partyFunction, source)
         queryTranscript = queryTranscript[0]
     else:
         queryTranscript = None
@@ -188,10 +210,8 @@ def monthToBow(initialYear, finalYear, source=bowDirectory):
         
         nextDate = date(year, monthInt, 1)
         reference[count] = startDate
-
         fileList.append(withinDates(startDate, nextDate, source))
         startDate = nextDate
-
         count += 1
 
     _, bows = arrayToBow(fileList, source)
@@ -220,9 +240,11 @@ def folderToBow(folder):
     matrix = vectorizer.fit_transform(documents)
     return reference, matrix, vectorizer
 
-def arrayToBow(docArray, folder=None):
+def arrayToBow(docArray, partyFunction, folder=None):
     # same as folderToBow but assumes a list of lists for documents
     # if multiple documents in same inner list then merge. But like by putting individual we can easily just use as a singular as well
+    
+
     documents = []
     i = 0
     reference = {}
@@ -239,13 +261,11 @@ def arrayToBow(docArray, folder=None):
             else:
                 tempFile = open(filename)
             
-            bow = json.loads(tempFile.readline())
+            partyBow = json.loads(tempFile.readline())
+            parties = partyFunction(filename)
+            fileBow = grabReleventBows(partyBow, parties)
+            mergeBow(doc, fileBow)
 
-            for key in bow:
-                if key in doc:
-                    doc[key] += bow[key]
-                else:
-                    doc[key] = bow[key]
         documents.append(doc)
     return reference, documents
 
@@ -254,5 +274,28 @@ def fileToBow(fileLocation):
     bow = json.loads(file.readline())
     return bow
 
+def grabReleventBows(partyBow, parties):
+    ### Given new format of split by party this may cause issues.
+    outputBow = {}
+    #print partyBow.keys()
+    for party in partyBow:
+        if party.lower() in parties:
+            mergeBow(outputBow, partyBow[party])
+    return outputBow
 
- 
+def mergeBow(primary, toAdd):
+    for key in toAdd:
+        if not key in primary:
+            primary[key] = 0
+        primary[key] += toAdd[key]
+
+
+def getFileDate(filename):
+    #given filename. Determine the date
+    parts = filename.split('.')
+    fileDate = datetime.strptime(parts[0],"%Y-%m-%d").date()
+    return fileDate
+
+def filenameToPartyInCharge(filename):
+    fileDate = getFileDate(filename)
+    return partyInCharge(fileDate)

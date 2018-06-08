@@ -11,15 +11,21 @@ How to improve:
 import hansardHandler
 import transcriptHandler
 import cosineComparison
-
+import graphs
+#hansardSource = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/bowNormalisedStemmed/"
 hansardSource = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/bowNormalisedStemmed/"
+hansardSource = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/byParty/bowNotNormalised/"
 
 transcriptSource = "/Users/jeremypattison/LargeDocument/ResearchProjectData/PMSpeeches/budgetBOW" #NOTE GET A STEMMED ONE
 
 
-initialYear = 2006
+initialYear = 2010
 finalYear = 2015
-_, hansardBows, hansardReference  = hansardHandler.budgetToBow(initialYear, finalYear, None, True, True, False, hansardSource)
+
+partyFunction = hansardHandler.filenameToPartyInCharge
+
+
+_, hansardBows, hansardReference  = hansardHandler.budgetToBow(initialYear, finalYear, None, partyFunction, True, True, False, hansardSource)
 
 #print hansardBows
 
@@ -39,3 +45,5 @@ for i in range(len(transcriptBows)):
 
 for i in range(len(klValues)):
     print "{0} : {1}".format(transcriptReference[i], klValues[i])
+
+graphs.makeGraph(transcriptReference, "scores", "KlHansardTranscripts", klValues)

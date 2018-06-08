@@ -2,7 +2,8 @@ import hansardHandler
 import cosineComparison
 import graphs
 
-bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/bowNormalisedStemmed/"
+#bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/bowNormalisedStemmed/"
+bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/byParty/bowNotNormalised/"
 
 
 def cosineHansard(dataset, queryTranscript, queryName, reference, k):
@@ -36,8 +37,10 @@ queryYear = 2017
 #2005, 2006, 2007, 2008, 2010, 2013, 2014, 2015, 2016, 2017
 # note leaving k = None means to svd transform :( 
 
+partyFunction = hansardHandler.filenameToPartyInCharge
+
 queryTranscript, dataset, reference = \
-   hansardHandler.budgetToBow(2005, 2017, queryYear, False, True, False, bowDirectory)
+   hansardHandler.budgetToBow(2005, 2017, queryYear, partyFunction, False, True, False, bowDirectory)
 #def budgetToBow(initialYear, finalYear, queryYear, budgetSession = False, budgetEstimates = False, skipFirstDay = False, source=bowDirectory)
 
 
