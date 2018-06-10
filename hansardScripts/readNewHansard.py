@@ -159,8 +159,6 @@ def bowByParty(speechByParty,removeCapitals, stemWords):
         output[key] = bow
     return output
 
-
-
 def produceBowByParty(fileLocation, removeCapitals, stemWords):
     input_file = open(fileLocation)
     byMps = groupByMp(input_file)

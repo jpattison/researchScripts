@@ -95,7 +95,7 @@ def lowerCaseList(inputList):
         output.append(word.lower())
     return output
 
-def sentencesToNormalised(document, removeCapitals=False, stemWords = False):
+def sentencesToNormalised(document, removeCapitals, stemWords): #, removeCapitals=False, stemWords = False):
     # assume string with character normalisation already done.
     # produces list of words broken by sentences
     # normalisation is remove of stopwords and words length 1 such as "s" or "a'"
