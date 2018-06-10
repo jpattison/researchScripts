@@ -150,13 +150,12 @@ def splitByCategory(initialYear, finalYear, mediaTypes, dayBuff=4, source=bowDir
 
 def getTranscriptsBudgetDateTechnique(initialYear, finalYear, queryYear, mediaTypes, 
 source=bowDirectory, budgetSession = False, budgetEstimates = False, both=False):
-    # this is similar to the above
+    # this is similar to the above but superior i think
 
     queryTranscripts = [] # the query.
     yearBreadth = finalYear - initialYear +1
     listofBowYears = [list() for i in range(yearBreadth)] # the datasert
     reference = {}
-
     for filename in os.listdir(source):
         filepath = source + "/" + filename
         file = open(filepath)

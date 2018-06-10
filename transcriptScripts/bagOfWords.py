@@ -32,7 +32,6 @@ def convertSpeeches(initYear, finYear, method, output_directory):
     for filename in os.listdir(SPEECHLOCATION):
         fileMap = {}
         split = str(filename).split('.')
-
         if len(split) > 1 : # i.e. has a file extension
             #print split
             continue
@@ -43,8 +42,17 @@ def convertSpeeches(initYear, finYear, method, output_directory):
         year = transcriptDic["data-release-date"].year
         if year <initYear or year > finYear:
             continue
+        if not transcriptDic["content"] or len(transcriptDic["content"]) < 1:
+            print "skipping"
+            print transcriptDic["content"]
+            # print type(transcriptDic["content"])
+            # print filename
+            # print transcriptDic["data-release-date"]
+            print "\n"
+            continue
         method(transcriptDic)
-
+        print filename
+        print transcriptDic["data-release-date"]
         transcriptDic["BOW"] = paraToBow(transcriptDic["sentences"])
 
         #print transcriptDic["BOW"]
@@ -60,7 +68,7 @@ def convertSpeeches(initYear, finYear, method, output_directory):
 def stemAndRemoveCapitals(transcriptDic):
     return readTranscript.normaliseTranscript(transcriptDic, True, True)
 
-convertSpeeches(2010, 2010, stemAndRemoveCapitals, output_directory)
+convertSpeeches(2005, 2015, stemAndRemoveCapitals, output_directory)
 
 
 # for filename in os.listdir(SPEECHLOCATION):

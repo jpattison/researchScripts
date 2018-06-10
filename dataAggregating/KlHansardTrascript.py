@@ -13,13 +13,13 @@ import transcriptHandler
 import cosineComparison
 import graphs
 #hansardSource = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/bowNormalisedStemmed/"
-hansardSource = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/bowNormalisedStemmed/"
-hansardSource = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/byParty/bowNotNormalised/"
+#hansardSource = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/bowNormalisedStemmed/"
+hansardSource = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/byParty/bowNormalisedAndStemmed/"
 
-transcriptSource = "/Users/jeremypattison/LargeDocument/ResearchProjectData/PMSpeeches/budgetBOW" #NOTE GET A STEMMED ONE
+transcriptSource = "/Users/jeremypattison/LargeDocument/ResearchProjectData/PMSpeeches/bowNormalisedStemmed"
 
 
-initialYear = 2010
+initialYear = 2008
 finalYear = 2015
 
 partyFunction = hansardHandler.filenameToPartyInCharge
@@ -36,14 +36,18 @@ _, transcriptBows, transcriptReference = transcriptHandler.getTranscriptsBudgetD
 
 #print transcriptBows
 
-print transcriptReference
+#print transcriptReference
 
 klValues = []
+xAxis = []
 for i in range(len(transcriptBows)):
     klValues.append(cosineComparison.KLbow(hansardBows[i], transcriptBows[i]))
 
-
+print klValues
 for i in range(len(klValues)):
     print "{0} : {1}".format(transcriptReference[i], klValues[i])
+    xAxis.append(transcriptReference[i])
 
-graphs.makeGraph(transcriptReference, "scores", "KlHansardTranscripts", klValues)
+#xAxis = [pair[0] for pair in transcriptReference[i]]
+
+graphs.makeGraph(xAxis, "scores", "KlHansardTranscripts", klValues)

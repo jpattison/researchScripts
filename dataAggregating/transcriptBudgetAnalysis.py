@@ -10,8 +10,7 @@ If I'm doing a call on the transcripts. It should be called from here
 
 """
 
-bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/bowNormalisedStemmed/"
-
+bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/PMSpeeches/bowNormalisedStemmed"
 
 
 
@@ -206,12 +205,17 @@ def cosineWithinYear(initialYear, finalYear, mediaTypes = None, dayBuff = 4):
 
 #2005To2009
 
-refYear = 2016
+refYear = 2013
 queryTranscript, dataset, reference = \
-    transcriptHandler.getTranscripts(2005, 2015, refYear, None, True, None, bowDirectory)
+    transcriptHandler.getTranscriptsBudgetDateTechnique(2010, 2014, refYear, None, bowDirectory, False, False, True)
 
-# KlPmTranscripts(dataset, queryTranscript, str(refYear), reference)
-cosineTranscripts(dataset, queryTranscript, str(refYear), reference, None)
+
+print queryTranscript
+print dataset
+print reference
+
+KlPmTranscripts(dataset, queryTranscript, str(refYear), reference)
+#cosineTranscripts(dataset, queryTranscript, str(refYear), reference, None)
 
 #2005, 2006, 2007, 2008, 2010, 2013, 2014, 2015, 2016, 2017
 
