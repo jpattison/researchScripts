@@ -5,7 +5,7 @@ import json
 def BowToJson(folders, modu, removeCapitals, stemWords):
 
 
-    outputDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/byParty/bowNormalisedAndStemmed/"
+    outputDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/byParty/bowNormalisedNotStemmed/"
     if not os.path.exists(outputDirectory):
         os.makedirs(outputDirectory)
 
@@ -30,7 +30,7 @@ def BowToJson(folders, modu, removeCapitals, stemWords):
 
 
 removeCapitals = True 
-stemWords = True
+stemWords = False
 
 oldFolders = [str(x) for x in range(1998,2011)] 
 oldFolders.append('2011_before_april')
