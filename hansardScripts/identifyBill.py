@@ -26,6 +26,9 @@ Language model being budgetweek, how much did they diverge?
 # input_file = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/2012/2012-06-19.xml"
 # input_file = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/2014/2014-06-03.xml"
 
+outputDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/hansardBills/"
+
+
 def mpByDebate(inputFile, billTitles, removeCapitals, stemWords):
 
     """ for a specific hansard date group all the speeches by mps on the bill into one
@@ -65,12 +68,13 @@ def mpByDebate(inputFile, billTitles, removeCapitals, stemWords):
     return bowParty
 
 def traceBill(startYear, endYear, billTitles, outcome, removeCapitals, stemWords):
-    outputDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/hansardBills/"
+    global outputDirectory
     outputFileName = billTitles[0]
     if not os.path.exists(outputDirectory):
         os.makedirs(outputDirectory)
 
-    billTracker = {"billName":outputFileName, "outcome":outcome, "speechesByDate":{}}
+    
+    billTracker = {"billName":outputFileName, "outcome":outcome, "speechesByDate":{}, "startYear":startYear}
 
     for year in range(startYear, endYear+1):
         yearStr = str(year)
@@ -93,28 +97,20 @@ def traceBill(startYear, endYear, billTitles, outcome, removeCapitals, stemWords
     outputFile = open(outputFileDirectory, 'w')
     json.dump(billTracker, outputFile)    
 
-
-
     return billTracker
 
 
 
 
+#billTitles = ["australian national preventive health agency (abolition) bill 2014"]
+billTitles = ["private health insurance amendment bill (no. 1) 2014"]
 
-billTitles = ["australian national preventive health agency (abolition) bill 2014"]
 
 #speeches = mpByDebate(input_file, billTitles)
 
 billTracker = traceBill(2014,2014, billTitles, "pass", True, True)
 print billTracker.keys()
+print "found for these dates"
 
-
-
-for hanDate in billTracker["speechesByDate"]:
-    print hanDate
-    print billTracker["speechesByDate"][hanDate].keys()
-
-
-print billTracker["speechesByDate"]["2014-06-03"]["ALP"]
-
-#wNormalisation.sentencesToNormalised(paragraph, removeCapitals, stemWords)
+for debateDate in billTracker["speechesByDate"]:
+    print debateDate

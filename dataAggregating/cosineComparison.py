@@ -103,7 +103,7 @@ def scoreDocuments(query, matrix, reference):
     return results
 
 def KLdivergence(query, matrix, reference):
-    #https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence
+    # https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence
 
     results = []
     sumQuery = sum(query)
@@ -134,28 +134,6 @@ def KLdivergence(query, matrix, reference):
     return results
 
 
-## this is our original. Trying to rewrite on 8June
-# def KLbow(queryBow, dataBow):
-#     # if we have two bag of words and want to know the KL without
-#     # doing vector stuff
-#     # reference is dataBow
-    
-#     sumQuery = 0
-#     sumData = 0
-#     summation = 0.0
-#     for key in queryBow:
-#         sumQuery += queryBow[key]
-#     for key in dataBow:
-#         sumData += dataBow[key]
-
-#     result = 0.0
-#     for key in queryBow:
-#         if not key in dataBow:
-#             continue
-#         qBow = queryBow[key] * 1.0 / sumQuery
-#         pBow = dataBow[key] * 1.0 / sumData
-#         summation -= pBow * math.log(qBow/pBow,2)
-#     return summation
 
 def calcSumBow(bow):
     # return the total number of words
@@ -202,9 +180,9 @@ def cosineBOW(queryBow, dataBow):
     return cos_distance(query, data)
 
 def KLdivergenceWords(qBow, pBow):
-    # like note this is probably wrong :p 
-    # I think pBow is the reference
-    # return the contribution to KL score by word. Used for helping identify word normalisation
+
+    # KL estimates the distribution difference. D(Q|P). Find contribution by word
+
 
     words = {} #kl for each word in pBow
     missing = {} # counts of words that are in qBow but not pBow. Not as useful
@@ -220,14 +198,13 @@ def KLdivergenceWords(qBow, pBow):
 
     for word in qBow:
         if not word in pBow:
+            missing[word] = qBow[word]
             continue
         pProb = pBow[word] * 1.0 / pLen
         qProb = qBow[word] * 1.0 / qLen
 
-        words[word] = -pProb * math.log(qProb/pProb,2)
-        pKeys.remove(word)
-    for word in pKeys:
-        missing[word] = pBow[word]
+        words[word] = pProb * math.log(pProb/qProb,2)
+
     return words, missing
 
 

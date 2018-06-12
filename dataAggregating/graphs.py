@@ -20,7 +20,7 @@ def makeGraph(xAxis, yLabel, title, values, context=None):
 
 
     axes = plt.gca()
-    axes.set_ylim([0,1])
+    #axes.set_ylim([0,1])
 
     #axes.set_ylim([2**-4,1])
 

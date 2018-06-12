@@ -18,7 +18,7 @@ def cosineHansard(dataset, queryTranscript, queryName, reference, k):
 
 
 def KlHansard(dataset, queryTranscript, queryName, reference):
-
+    # This is for when i have a specific target year to compare others to
     #print dataset
     matrix, query = cosineComparison.matrixQueryNoTransformation(dataset, queryTranscript)
 
@@ -32,22 +32,48 @@ def KlHansard(dataset, queryTranscript, queryName, reference):
     values = [pair[1] for pair in scores]
     graphs.makeGraph(xAxis, "scores", "Hansard for {0}".format(queryName), values, queryName)
 
-queryYear = 2009
 
-#2005, 2006, 2007, 2008, 2010, 2013, 2014, 2015, 2016, 2017
-# note leaving k = None means to svd transform :( 
+def KlHansardIterative(dataset, reference):
+    # I want to compare the previous year to current year itteratively
+    print reference
+    print len(dataset)  
+    #print dataset[0]
+    klValues = []
+    yearsInvestigated = []
+    for i in range(1,len(dataset)):
+        priorBow = dataset[i-1]
+        currentBow = dataset[i]
+        currentYear = reference[i]
+        
+        yearsInvestigated.append(currentYear)
+        klValues.append(cosineComparison.KLbow(currentBow, priorBow))
+
+    print klValues
+    graphs.makeGraph(yearsInvestigated, "scores", "Iterative KL", klValues, "not sure what this is")
+
+
 
 partyFunction = hansardHandler.filenameToPartyInCharge
 
+
+
+"""
+
+queryYear = 2009
+
 queryTranscript, dataset, reference = \
    hansardHandler.budgetToBow(2005, 2017, queryYear, partyFunction, False, True, False, bowDirectory)
-#def budgetToBow(initialYear, finalYear, queryYear, budgetSession = False, budgetEstimates = False, skipFirstDay = False, source=bowDirectory)
 
-
-#print len(dataset)
 print reference
 #cosineHansard(dataset, queryTranscript, str(queryYear), reference, None)
-
 KlHansard(dataset, queryTranscript, str(queryYear), reference)
 
 
+"""
+
+_, dataset, reference = \
+   hansardHandler.budgetToBow(2005, 2017, None, partyFunction, True, False, False, bowDirectory)
+
+#KlHansardIterative(dataset, reference)
+
+#print cosineComparison.KLdivergenceWords(dataset[1],dataset[0])

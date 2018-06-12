@@ -11,7 +11,11 @@ Relates to running language analysis on hansard speeches
 import json
 import cosineComparison
 import graphs
-# bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/bowNormalised2/"
+
+import hansardHandler
+
+bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/byParty/bowNormalisedAndStemmed/"
+
 
 
 # budget2017 = ["2017-05-09.json","2017-05-10.json","2017-05-11.json"]
@@ -131,11 +135,10 @@ def createGraph(referenceBudget, yearAsString):
 
 
 # compare KL for words between two years
-def KLdivergence(pBudget, qBudget, pName, qName):
-    _, pBow = cosineComparison.arrayToBow([pBudget], bowDirectory)
-    _, qBow = cosineComparison.arrayToBow([qBudget], bowDirectory)
+def KLdivergence(pBow, qBow, pName, qName):
 
-    pBow, qBow = pBow[0], qBow[0]
+
+    
 
     klWords, missing = cosineComparison.KLdivergenceWords(pBow, qBow)
 
@@ -149,7 +152,11 @@ def KLdivergence(pBudget, qBudget, pName, qName):
         print("Word: {0} {3}: {1} {4}: {2}".format(word, pBow[word], qBow[word], pName, qName))
 
 #createGraph(budget2010, "2010") 
+partyFunction = hansardHandler.filenameToPartyInCharge
 
-KLdivergence(budget2014, budget2006, "2014", "2006")
+_, dataset, reference = \
+   hansardHandler.budgetToBow(2005, 2017, None, partyFunction, True, False, False, bowDirectory)
+
+KLdivergence(dataset[1], dataset[0], "2014", "2006")
 
 

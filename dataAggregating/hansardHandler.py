@@ -274,9 +274,8 @@ def fileToBow(fileLocation):
     bow = json.loads(file.readline())
     return bow
 
-def grabReleventBows(partyBow, parties):
+def grabReleventBows(partyBow, parties, outputBow = {}):
     ### Given new format of split by party this may cause issues.
-    outputBow = {}
     #print partyBow.keys()
     for party in partyBow:
         if party.lower() in parties:
@@ -299,3 +298,10 @@ def getFileDate(filename):
 def filenameToPartyInCharge(filename):
     fileDate = getFileDate(filename)
     return partyInCharge(fileDate)
+
+
+def returnSpecificParty(partyList):
+    def ignoreInput(something):
+        return partyList
+    return ignoreInput
+
