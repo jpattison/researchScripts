@@ -57,12 +57,13 @@ def removeStopWords(words):
     # assume input is simply a list of words. Want to keep normal words only
     # do i want to remove all capital words?
     global stop_words
+    global customStopWords
     output = []
     
     for word in words:
         
 
-        if len(word) <= 1 or word in stop_words:
+        if len(word) <= 1 or word in stop_words or word in customStopWords:
             continue
         # if not word in nltkWords:
         #     print "removed " + word
