@@ -3,9 +3,12 @@ import cosineComparison
 import graphs
 
 #bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/bowNormalisedStemmed/"
-bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/byParty/bowNormalisedAndStemmed/"
+# bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/byParty/bowNormalisedAndStemmed/"
+
+bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/byParty/bowNotNormalised/"
 
 
+"""
 def cosineHansard(dataset, queryTranscript, queryName, reference, k):
     matrix, query = cosineComparison.calculateComparison(dataset, queryTranscript, k)
     scores = cosineComparison.scoreDocuments(query, matrix, reference)
@@ -14,23 +17,22 @@ def cosineHansard(dataset, queryTranscript, queryName, reference, k):
     values = [pair[1] for pair in scores]
     graphs.makeGraph(xAxis, "scores", "Hansard Cosine. Reference = {0} K = {1}".\
         format(queryName,k), values)
-
+"""
 
 
 def KlHansard(dataset, queryTranscript, queryName, reference):
     # This is for when i have a specific target year to compare others to
     #print dataset
-    matrix, query = cosineComparison.matrixQueryNoTransformation(dataset, queryTranscript)
 
     #print(matrix)
-    scores = cosineComparison.KLdivergence(query, matrix, reference) #jointEntropy
-    scores.sort(key=lambda x: x[0])
+    scores = cosineComparison.KLdivergence(queryTranscript, dataset, reference) #jointEntropy
 
     print scores
 
+
     xAxis = [pair[0] for pair in scores]
     values = [pair[1] for pair in scores]
-    graphs.makeGraph(xAxis, "scores", "Hansard for {0}".format(queryName), values, queryName)
+    graphs.makeGraph(xAxis, "scores", "KL Hansard for {0}".format(queryName), values, queryName)
 
 
 def KlHansardIterative(dataset, reference):
@@ -49,20 +51,23 @@ def KlHansardIterative(dataset, reference):
         klValues.append(cosineComparison.KLbow(currentBow, priorBow))
 
     print klValues
-    graphs.makeGraph(yearsInvestigated, "scores", "Iterative KL", klValues, "not sure what this is")
+    graphs.makeGraph(yearsInvestigated, "scores", "KL Government", klValues, "not sure what this is")
 
 
 
-partyFunction = hansardHandler.filenameToPartyInCharge
 
 
+partyFunction = hansardHandler.filenameToPartyInCharge #fileNameToOppsition #filenameToPartyInCharge
+
+
+
+
+queryYear = 2006
+
+# queryTranscript, dataset, reference = \
+#    hansardHandler.budgetToBow(2005, 2017, queryYear, partyFunction, False, True, False, bowDirectory)
 
 """
-
-queryYear = 2009
-
-queryTranscript, dataset, reference = \
-   hansardHandler.budgetToBow(2005, 2017, queryYear, partyFunction, False, True, False, bowDirectory)
 
 print reference
 #cosineHansard(dataset, queryTranscript, str(queryYear), reference, None)
@@ -71,9 +76,7 @@ KlHansard(dataset, queryTranscript, str(queryYear), reference)
 
 """
 
+
 _, dataset, reference = \
-   hansardHandler.budgetToBow(2005, 2017, None, partyFunction, True, False, False, bowDirectory)
-
-#KlHansardIterative(dataset, reference)
-
-#print cosineComparison.KLdivergenceWords(dataset[1],dataset[0])
+   hansardHandler.budgetToBow(1999, 2017, None, partyFunction, True, True, False, bowDirectory)
+KlHansardIterative(dataset, reference)

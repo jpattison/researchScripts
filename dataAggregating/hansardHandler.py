@@ -7,7 +7,8 @@ Output should generally be bag of words of corpus, query and a reference
 
 from datetime import timedelta, date, datetime
 
-bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/bowNormalised2/"
+# bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/bowNormalised2/"
+bowDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/byParty/bowNormalisedAndStemmed/"
 
 
 import json
@@ -17,7 +18,38 @@ import os
 
 
 politicalCalandar = {
+    1999: { 
+        "budget": [date(1999, 05, 11), date(1999, 05, 13)],
+        "estimates" : [date(1999, 05, 31), date(1999, 06, 10)]       
+    },  
+
+    2000: { # not as sure for 2000
+        "budget": [date(2000, 05, 9), date(2000, 05, 11)],
+        "estimates" : [date(2000, 05, 29), date(2000, 06, 8)]       
+    },
+
+    2001: {
+        "budget": [date(2001, 05, 22), date(2001, 05, 24)],
+        "estimates" : [date(2001, 06, 4), date(2001, 06, 07)]       
+    },
+
+
+    2002: {
+        "budget": [date(2002, 05, 14), date(2002, 05, 16)],
+        "estimates" : [date(2002, 05, 27), date(2002, 06, 06)]       
+    },
     
+    2003: {
+        "budget": [date(2003, 05, 13), date(2003, 05, 15)],
+        "estimates" : [date(2003, 05, 26), date(2003, 06, 06)]       
+    },
+
+    2004: {
+        "budget": [date(2004, 05, 11), date(2004, 05, 13)],
+        "estimates" : [date(2004, 05, 24), date(2004, 06, 04)]        
+
+    },
+
     2005: {
         "budget": [date(2005, 05, 10), date(2005, 05, 12)],
         "estimates" : [date(2005, 05, 23), date(2005, 06, 03)]
@@ -92,6 +124,18 @@ def partyInCharge(fileDate):
             break
     return parties
 
+def partyInOpposition(fileDate):
+    global labor
+    global coalition
+
+    govParty = partyInCharge(fileDate)
+    parties = None
+
+    if govParty == coalition:
+        parties = labor
+    elif govParty == labor:
+        parties = coalition
+    return parties    
 
 
 
@@ -164,7 +208,8 @@ def getBudgets(years, source, budgetSession = False, budgetEstimates = False, sk
         if budgetSession:
             dates = politicalCalandar[year]["budget"]
             if skipFirstDay:
-                dates[0] += datetime.timedelta(days=1)
+                print dates
+                dates[0] += timedelta(days=1)
             tempYear.extend(withinDates(dates[0], dates[1], source))
         if budgetEstimates:
             dates = politicalCalandar[year]["estimates"]
@@ -195,7 +240,7 @@ def budgetToBow(initialYear, finalYear, queryYear, partyFunction, budgetSession 
 
     return queryTranscript, dataset, reference 
 
-
+"""
 def monthToBow(initialYear, finalYear, source=bowDirectory):
     # want a bag of words representation of all years, split by months 
     reference = {}
@@ -216,7 +261,7 @@ def monthToBow(initialYear, finalYear, source=bowDirectory):
 
     _, bows = arrayToBow(fileList, source)
     return reference, bows
-
+"""
 
 def folderToBow(folder):
     reference = {} 
@@ -244,16 +289,32 @@ def arrayToBow(docArray, partyFunction, folder=None):
     # same as folderToBow but assumes a list of lists for documents
     # if multiple documents in same inner list then merge. But like by putting individual we can easily just use as a singular as well
     
+    """
+    Given a list of list of documents. I want to return a list of bag of words. We assume each list of list corresponds to a 
+    set of documents in the same year. We want to merge those in the same year to a big bag of words.
+
+
+    At the same time there's an associated partyFunction of the parties we want to grab the documents from
+
+    """
 
     documents = []
     i = 0
     reference = {}
     for docSet in docArray:
+        #print docSet
         doc = {}
+        # print "newDoc size = {0}".format(len(doc))
         name = None
         for filename in docSet:
+            
             if name == None:
+
                 name = filename
+                print name
+                print len(docSet)
+
+                # print name
                 reference[i]=int(name[:4])
                 i+=1
             if folder:
@@ -261,19 +322,57 @@ def arrayToBow(docArray, partyFunction, folder=None):
             else:
                 tempFile = open(filename)
             
-            partyBow = json.loads(tempFile.readline())
+            hansardByParty = json.loads(tempFile.readline())
+
+            # sane amount
+            #numberOfWordsInPartyBow(hansardByParty)
+            
+
             parties = partyFunction(filename)
-            fileBow = grabReleventBows(partyBow, parties)
-            mergeBow(doc, fileBow)
+
+            bowPartiesMerged = retrieveBowFromParties(hansardByParty, parties)
+            # now add the bow to the year combined
+            addToDictionary(doc, bowPartiesMerged)
+            
 
         documents.append(doc)
     return reference, documents
+
+def numberOfWordsInPartyBow(partyBow):
+    total = 0
+    for party in partyBow:
+        total += countWords(partyBow[party])
+    print "{0} words detected total".format(total)
+
+def countWords(bow):
+    subTotal = 0
+    for word in bow:
+        subTotal += bow[word]
+    return subTotal 
 
 def fileToBow(fileLocation):
     file = open(fileLocation)
     bow = json.loads(file.readline())
     return bow
 
+
+def retrieveBowFromParties(hansardByParty, interestedParties):
+    output = {}
+
+    for party in hansardByParty:
+        if party.lower() in interestedParties:
+            addToDictionary(output, hansardByParty[party])
+    return output
+
+def addToDictionary(addTo, addFrom):
+    for word in addFrom:
+        if not word in addTo:
+            addTo[word] = 0
+        addTo[word] += addFrom[word]
+
+
+"""
+bugs were due to these two things. Redoing above
 def grabReleventBows(partyBow, parties, outputBow = {}):
     ### Given new format of split by party this may cause issues.
     #print partyBow.keys()
@@ -287,7 +386,7 @@ def mergeBow(primary, toAdd):
         if not key in primary:
             primary[key] = 0
         primary[key] += toAdd[key]
-
+"""
 
 def getFileDate(filename):
     #given filename. Determine the date
@@ -299,6 +398,9 @@ def filenameToPartyInCharge(filename):
     fileDate = getFileDate(filename)
     return partyInCharge(fileDate)
 
+def fileNameToOppsition(filename):
+    fileDate = getFileDate(filename)
+    return partyInOpposition(fileDate)
 
 def returnSpecificParty(partyList):
     def ignoreInput(something):

@@ -106,30 +106,34 @@ def KLdivergence(query, matrix, reference):
     # https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence
 
     results = []
-    sumQuery = sum(query)
     count = 0
 
+    print matrix
 
     #print len(matrix)
     for column in matrix:
-        summation = 0.0
-        length = len(column)
-        sumCompared = sum(column)
-        for i in range(0,len(column)):
-            qBow = query[i]*1.0 / sumQuery #Q
-            pBow = column[i]*1.0 / sumCompared #P
-            #tProb = qBow * pBow
-            if qBow ==0 or pBow ==0:
-                continue
-            #print tProb
-            #print query[i]
-            #print column[i]
-            summation -= pBow * math.log(qBow/pBow,2) 
-        #summation += 1 # avoiding the log0 error
+        # summation = 0.0
+        # length = len(column)
+        # sumCompared = sum(column)
+        # for i in range(0,len(column)):
+        #     qBow = query[i]*1.0 / sumQuery #Q
+        #     pBow = column[i]*1.0 / sumCompared #P
+        #     #tProb = qBow * pBow
+        #     if qBow ==0 or pBow ==0:
+        #         continue
+        #     #print tProb
+        #     #print query[i]
+        #     #print column[i]
+        #     summation -= pBow * math.log(qBow/pBow,2) 
+        # #summation += 1 # avoiding the log0 error
+        
+
 
         name = reference[count]
         count+=1
-        results.append([name, summation])
+        print name
+        results.append([name, KLbow(column, query)])
+
     #results.sort(key=lambda x: x[1])
     return results
 
@@ -143,18 +147,25 @@ def calcSumBow(bow):
     return total
 
 
-def KLbow(pBow, qBow):
+def KLbow(pBow, qBow, plusOneSmoothing = False
+
+    ):
 
     # KL estimates the distribution difference. D(P|Q). Q DOES NOT stand for query, instead it is our base.
 
+    if plusOneSmoothing:
+        print "note you're smoothing"
+        qBow = plusOneSmooth(qBow, pBow)
     denP = calcSumBow(pBow) # denominator for P
     denQ = calcSumBow(qBow) # denominator for Q
+
 
     KL = 0.0
 
     for word in pBow:
         probP = pBow[word]*1.0/denP
         if word not in qBow:
+            #print "skipped a number"
             continue # we give it a value of 0 but this probably isn't a good assumption
         probQ = qBow[word]*1.0/denQ
         kInstance = probP * math.log(probP/probQ,2)
@@ -207,7 +218,12 @@ def KLdivergenceWords(qBow, pBow):
 
     return words, missing
 
-
+def plusOneSmooth(base, p):
+    ### want to do plus one smoothing add an instance of p to base to ensure nothing is skipped
+    for word in p:
+        if not word in base:
+            base[word]=1
+    return base
 
 
 
