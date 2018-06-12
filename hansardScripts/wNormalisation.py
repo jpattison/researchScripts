@@ -20,6 +20,7 @@ from nltk.corpus import stopwords
 
 stop_words = set(stopwords.words('english'))
 
+customStopWords = ["honourable", "member", "government", "question", "answer"]
 import wNormalisation
 import re
 
@@ -55,7 +56,7 @@ def getStemmed(words):
 def removeStopWords(words):
     # assume input is simply a list of words. Want to keep normal words only
     # do i want to remove all capital words?
-
+    global stop_words
     output = []
     
     for word in words:
@@ -107,8 +108,9 @@ def sentencesToNormalised(document, removeCapitals, stemWords): #, removeCapital
         words = word_tokenize(sentence)
         if removeCapitals:
             words = stripCapitalisedWords(words)
-        words = removeStopWords(words)
         words = lowerCaseList(words)
+        words = removeStopWords(words)
+        
         if stemWords:
             words = getStemmed(words)
 
