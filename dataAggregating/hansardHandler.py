@@ -311,8 +311,8 @@ def arrayToBow(docArray, partyFunction, folder=None):
             if name == None:
 
                 name = filename
-                print name
-                print len(docSet)
+                #print name
+                #print len(docSet)
 
                 # print name
                 reference[i]=int(name[:4])

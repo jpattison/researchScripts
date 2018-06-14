@@ -14,6 +14,7 @@ from datetime import datetime
 import numpy as np
 import graphs
 import math
+import copy
 
 # def folderToBow(folder):
 #     reference = {} 
@@ -102,13 +103,13 @@ def scoreDocuments(query, matrix, reference):
     #results.sort(key=lambda x: x[1])
     return results
 
-def KLdivergence(query, matrix, reference):
+def KLdivergence(query, matrix, reference, smoothing):
     # https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence
 
     results = []
     count = 0
 
-    print matrix
+    #print matrix
 
     #print len(matrix)
     for column in matrix:
@@ -131,8 +132,8 @@ def KLdivergence(query, matrix, reference):
 
         name = reference[count]
         count+=1
-        print name
-        results.append([name, KLbow(column, query)])
+        #print name
+        results.append([name, KLbow(column, query, smoothing)])
 
     #results.sort(key=lambda x: x[1])
     return results
@@ -147,14 +148,14 @@ def calcSumBow(bow):
     return total
 
 
-def KLbow(pBow, qBow, plusOneSmoothing = False
-
-    ):
-
+def KLbow(pBow, qBow, plusOneSmoothing):
+    # https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence
     # KL estimates the distribution difference. D(P|Q). Q DOES NOT stand for query, instead it is our base.
+
 
     if plusOneSmoothing:
         print "note you're smoothing"
+        qBow = copy.deepcopy(qBow)
         qBow = plusOneSmooth(qBow, pBow)
     denP = calcSumBow(pBow) # denominator for P
     denQ = calcSumBow(qBow) # denominator for Q
@@ -174,7 +175,7 @@ def KLbow(pBow, qBow, plusOneSmoothing = False
 
 
 
-
+"""
 def cosineBOW(queryBow, dataBow):
     # two bag of words.
     #Just do cosine comparison, no TFIDF or anything
@@ -189,7 +190,7 @@ def cosineBOW(queryBow, dataBow):
     # print "inbetween2 \n"
     # print query
     return cos_distance(query, data)
-
+"""
 def KLdivergenceWords(qBow, pBow):
 
     # KL estimates the distribution difference. D(Q|P). Find contribution by word
@@ -220,6 +221,8 @@ def KLdivergenceWords(qBow, pBow):
 
 def plusOneSmooth(base, p):
     ### want to do plus one smoothing add an instance of p to base to ensure nothing is skipped
+    
+
     for word in p:
         if not word in base:
             base[word]=1
