@@ -172,11 +172,11 @@ def inbetweenDates(filename, budgetSession = False, budgetEstimates = False, bot
         print type(filename)
     year = fileDate.year
     if year in politicalCalandar:
-        if budgetSession:
+        if budgetSession and not both:
             (start, finish) = politicalCalandar[year]["budget"]
             if fileDate>=start and fileDate<= finish:
                 return True
-        if budgetEstimates:
+        if budgetEstimates and not both:
             (start, finish) = politicalCalandar[year]["estimates"]
             if fileDate>=start and fileDate<= finish:
                 return True   

@@ -2,6 +2,12 @@ import xml.etree.ElementTree as ET
 import readNewHansard
 import os
 import json
+import sys
+sys.path.insert(0, '/Users/jeremypattison/LargeDocument/scripts/dataAggregating')
+import hansardHandler
+
+
+
 """
 Idea is we want to have bill, maybe as a list. Each time is a time that the bill was debated on. Idea 
 is to be able to compare the final debate to the first one. Keep track of all mps and their parties and their dates.
@@ -29,7 +35,7 @@ Language model being budgetweek, how much did they diverge?
 outputDirectory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/hansardBills/"
 
 
-def mpByDebate(inputFile, billTitles, removeCapitals, stemWords):
+def billOnDateByMp(inputFile, billTitles, removeCapitals, stemWords):
 
     """ for a specific hansard date group all the speeches by mps on the bill into one
     This produces the "speeches" part of structure
@@ -67,7 +73,8 @@ def mpByDebate(inputFile, billTitles, removeCapitals, stemWords):
     bowParty = readNewHansard.bowByParty(byParty, removeCapitals, stemWords)
     return bowParty
 
-def traceBill(startYear, endYear, billTitles, outcome, removeCapitals, stemWords):
+def traceBill(startYear, endYear, billTitles, outcome, removeCapitals, stemWords, budgetMode =False):
+    # if budgetMode we disgard all bills that appear before the budget add to corpus for ones that fall in it.
     global outputDirectory
     outputFileName = billTitles[0]
     if not os.path.exists(outputDirectory):
@@ -88,7 +95,7 @@ def traceBill(startYear, endYear, billTitles, outcome, removeCapitals, stemWords
             date = split[0]
             fileLocation = input_directory+'/'+filename
             print fileLocation
-            speechesOnDate = mpByDebate(fileLocation, billTitles, removeCapitals, stemWords)
+            speechesOnDate = billOnDateByMp(fileLocation, billTitles, removeCapitals, stemWords)
             if speechesOnDate:
                 print "got something"
                 billTracker["speechesByDate"][date]= speechesOnDate
@@ -100,17 +107,66 @@ def traceBill(startYear, endYear, billTitles, outcome, removeCapitals, stemWords
     return billTracker
 
 
+def allBillsOnBudget(year):
+    billsTitles = []
+    input_directory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/{0}".format(year)
+    for filename in os.listdir(input_directory):
 
+            split = str(filename).split('.')
+            extension = split[-1].lower()
+            if extension != 'xml':
+                continue
+            date = split[0]
+            fileLocation = input_directory+'/'+filename
+            if not hansardHandler.inbetweenDates(filename, False, True, False):
+                continue
+            billsTitles.extend(grabBillTitles(fileLocation))
+    print "{0} bills detected".format(len(billsTitles))
+    for bill in billsTitles:
+        print bill
+        print ""
+
+
+
+
+def grabBillTitles(inputFile):
+
+    """ for a specific hansard date group all the speeches by mps on the bill into one
+    This produces the "speeches" part of structure
+
+    """
+    
+    tree = ET.parse(inputFile)
+    root = tree.getroot()
+    bills = root.findall(".//debateinfo[title='BILLS']/../subdebate.1")
+    
+    titles = []
+    
+    for subdebate in bills:
+
+        
+
+        #print subdebate
+        title = subdebate.find('subdebateinfo/title').text
+        #print title.lower()
+        titles.append(title.lower())
+    return titles
 
 #billTitles = ["australian national preventive health agency (abolition) bill 2014"]
-billTitles = ["private health insurance amendment bill (no. 1) 2014"]
+#billTitles = ["private health insurance amendment bill (no. 1) 2014"]
+billTitles = ["Export Inspection (Service Charge) Amendment Bill 2014".lower()]
 
+#speeches = billOnDateByMp(input_file, billTitles)
 
-#speeches = mpByDebate(input_file, billTitles)
 
 billTracker = traceBill(2014,2014, billTitles, "pass", True, True)
 print billTracker.keys()
 print "found for these dates"
 
+print billTracker["speechesByDate"].keys()
 for debateDate in billTracker["speechesByDate"]:
     print debateDate
+
+
+
+#allBillsOnBudget(2014)
