@@ -5,6 +5,7 @@ import json
 import sys
 sys.path.insert(0, '/Users/jeremypattison/LargeDocument/scripts/dataAggregating')
 import hansardHandler
+from unidecode import unidecode
 
 
 
@@ -54,6 +55,7 @@ def billOnDateByMp(inputFile, billTitles, removeCapitals, stemWords):
 
         #print subdebate
         title = subdebate.find('subdebateinfo/title').text
+        title = unidecode(title)
         #print title.lower()
         if not title.lower() in billTitles:
             continue
@@ -73,15 +75,19 @@ def billOnDateByMp(inputFile, billTitles, removeCapitals, stemWords):
     bowParty = readNewHansard.bowByParty(byParty, removeCapitals, stemWords)
     return bowParty
 
-def traceBill(startYear, endYear, billTitles, outcome, removeCapitals, stemWords, budgetMode =False):
-    # if budgetMode we disgard all bills that appear before the budget add to corpus for ones that fall in it.
-    global outputDirectory
-    outputFileName = billTitles[0]
+def traceBill(startYear, endYear, billTitles, removeCapitals, stemWords):
+    """
+    Given a year and a set of billTitles (in case of multiple names for same one)
+    produce a dicitionary of all speeches 
+
+    """
+
+    # outputFileName = billTitles[0]
     if not os.path.exists(outputDirectory):
         os.makedirs(outputDirectory)
 
     
-    billTracker = {"billName":outputFileName, "outcome":outcome, "speechesByDate":{}, "startYear":startYear}
+    billTracker = {"speechesByDate":{}, "startYear":startYear, "firstDetected": None}
 
     for year in range(startYear, endYear+1):
         yearStr = str(year)
@@ -92,23 +98,29 @@ def traceBill(startYear, endYear, billTitles, outcome, removeCapitals, stemWords
             extension = split[-1].lower()
             if extension != 'xml':
                 continue
-            date = split[0]
+            dateStr = split[0]
+            dateDateFormat = hansardHandler.getFileDate(filename)
+            if not billTracker["firstDetected"] or billTracker["firstDetected"] > dateDateFormat:
+                billTracker["firstDetected"] = dateDateFormat
+
             fileLocation = input_directory+'/'+filename
-            print fileLocation
+            #print fileLocation
             speechesOnDate = billOnDateByMp(fileLocation, billTitles, removeCapitals, stemWords)
             if speechesOnDate:
-                print "got something"
-                billTracker["speechesByDate"][date]= speechesOnDate
+                #print "got something"
+                billTracker["speechesByDate"][dateStr]= speechesOnDate
     
-    outputFileDirectory = outputDirectory+outputFileName+".json"
-    outputFile = open(outputFileDirectory, 'w')
-    json.dump(billTracker, outputFile)    
+ 
 
     return billTracker
 
 
 def allBillsOnBudget(year):
-    billsTitles = []
+    """
+    returns all the bills that are mentioned during budget
+    """
+
+    titleBills = []
     input_directory = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/{0}".format(year)
     for filename in os.listdir(input_directory):
 
@@ -118,21 +130,19 @@ def allBillsOnBudget(year):
                 continue
             date = split[0]
             fileLocation = input_directory+'/'+filename
-            if not hansardHandler.inbetweenDates(filename, False, True, False):
+            if not hansardHandler.inbetweenDates(filename, True, False, False):
                 continue
-            billsTitles.extend(grabBillTitles(fileLocation))
-    print "{0} bills detected".format(len(billsTitles))
-    for bill in billsTitles:
-        print bill
-        print ""
+            titleBills.extend(grabBillTitles(fileLocation))
+    print "{0} bills detected".format(len(titleBills))
+    return titleBills
 
 
 
 
 def grabBillTitles(inputFile):
 
-    """ for a specific hansard date group all the speeches by mps on the bill into one
-    This produces the "speeches" part of structure
+    """ 
+    Return all bills mentioned in a day of parliament
 
     """
     
@@ -149,16 +159,73 @@ def grabBillTitles(inputFile):
         #print subdebate
         title = subdebate.find('subdebateinfo/title').text
         #print title.lower()
-        titles.append(title.lower())
+        titles.append(unidecode(title).lower())
     return titles
+
+
+
+def speechForBudgetMeasure(year, removeCapitals, stemWords, skipFirstDay):
+    """
+    1) For the specific year grabs all bills mentioned through that budget
+    2) Goes through the year and groups the speeches with the bills and date
+    3) If the bill is first mentioned during the budet time then we save it
+    4) Saves to output
+
+    To do a seperate one:
+    3) Scans through the data now and any bill that has mention of on first day of budget or before is removed
+        we remove first day of budget as bills aren't introduced until second day
+    4) Also doesn't attach the speech for any during the budget week / budget estimate. Cause don't want to to mix them up
+
+    """
+
+    global outputDirectory
+
+    bills = allBillsOnBudget(year)
+    #print bills
+
+    allBills = {}
+
+    cutOffDate = hansardHandler.politicalCalandar[year]["budget"][0] # the first day of budget
+
+
+    for bill in bills:
+        if len(bill) > 200:
+            print "\nskipped {0}\n".format(bill)
+            continue
+
+        print "\n\ndoing {0}".format(bill)
+        associatedSpeech = traceBill(year, year, [bill], removeCapitals, stemWords)
+        firstDetected = associatedSpeech["firstDetected"]
+        # print "first date is {0} ".format(firstDetected)
+        # print "cutoff date is {0}".format(cutOffDate)
+        # print firstDetected<= cutOffDate
+
+        if not firstDetected:
+            print "can't find a speech"
+            continue
+        elif skipFirstDay and firstDetected<= cutOffDate:
+            print "skipping as mentioned before budget"
+            continue
+        elif not skipFirstDay and firstDetected < cutOffDate:
+            print "skipping as mentioned before budget"
+            continue
+
+        associatedSpeech["firstDetected"] = firstDetected.strftime("%Y-%m-%d")
+        allBills[bill] = associatedSpeech
+        #print associatedSpeech
+
+    outputFileDirectory = outputDirectory+str(year)+".json"
+    outputFile = open(outputFileDirectory, 'w')
+    json.dump(allBills, outputFile)   
+
 
 #billTitles = ["australian national preventive health agency (abolition) bill 2014"]
 #billTitles = ["private health insurance amendment bill (no. 1) 2014"]
-billTitles = ["Export Inspection (Service Charge) Amendment Bill 2014".lower()]
+#billTitles = ["Export Inspection (Service Charge) Amendment Bill 2014".lower()]
 
 #speeches = billOnDateByMp(input_file, billTitles)
 
-
+"""
 billTracker = traceBill(2014,2014, billTitles, "pass", True, True)
 print billTracker.keys()
 print "found for these dates"
@@ -166,7 +233,9 @@ print "found for these dates"
 print billTracker["speechesByDate"].keys()
 for debateDate in billTracker["speechesByDate"]:
     print debateDate
+"""
 
 
+# allBillsOnBudget(2014)
 
-#allBillsOnBudget(2014)
+speechForBudgetMeasure(2014, True, True, True)
