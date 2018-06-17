@@ -138,6 +138,20 @@ def KLdivergence(query, matrix, reference, smoothing):
     #results.sort(key=lambda x: x[1])
     return results
 
+def KLBackwardsDivergence(query, matrix, reference, smoothing):
+    """
+    Have the matrix as the reference and predict query
+
+    """
+    results = []
+    count = 0
+
+    for column in matrix:
+        name = reference[count]
+        count+=1
+        results.append([name, KLbow(query, column, smoothing)])     
+    return results   
+
 
 
 def calcSumBow(bow):

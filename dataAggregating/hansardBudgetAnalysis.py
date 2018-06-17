@@ -35,6 +35,20 @@ def KlHansard(dataset, queryTranscript, queryName, reference, smoothing):
 
     graphs.makeGraph(xAxis, "scores", "KL Hansard for {0} Smoothing - {1}".format(queryName, smoothing), values, queryName)
 
+def KLBackwardsGraph(dataset, queryTranscript, queryName, reference, smoothing):
+    # Want to compare all years to specific year. All years is reference to predict specific.
+    #print dataset
+
+    #print(matrix)
+    scores = cosineComparison.KLBackwardsDivergence(queryTranscript, dataset, reference, smoothing) #jointEntropy
+
+    print scores
+
+
+    xAxis = [pair[0] for pair in scores]
+    values = [pair[1] for pair in scores]
+
+    graphs.makeGraph(xAxis, "scores", "KL Hansard for {0} Smoothing - {1}".format(queryName, smoothing), values, queryName)
 
 def KlHansardIterative(dataset, reference, smoothing):
     # I want to compare the previous year to current year itteratively
@@ -56,7 +70,7 @@ def KlHansardIterative(dataset, reference, smoothing):
 
 
 
-
+"""
 
 partyFunction = hansardHandler.filenameToPartyInCharge #fileNameToOppsition #filenameToPartyInCharge
 
@@ -73,7 +87,7 @@ queryTranscript, dataset, reference = \
 
 print reference
 KlHansard(dataset, queryTranscript, str(queryYear), reference, smoothing)
-
+"""
 
 """
 

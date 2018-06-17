@@ -100,14 +100,14 @@ def traceBill(startYear, endYear, billTitles, removeCapitals, stemWords):
                 continue
             dateStr = split[0]
             dateDateFormat = hansardHandler.getFileDate(filename)
-            if not billTracker["firstDetected"] or billTracker["firstDetected"] > dateDateFormat:
-                billTracker["firstDetected"] = dateDateFormat
+
 
             fileLocation = input_directory+'/'+filename
             #print fileLocation
             speechesOnDate = billOnDateByMp(fileLocation, billTitles, removeCapitals, stemWords)
             if speechesOnDate:
-                #print "got something"
+                if not billTracker["firstDetected"] or billTracker["firstDetected"] > dateDateFormat:
+                    billTracker["firstDetected"] = dateDateFormat
                 billTracker["speechesByDate"][dateStr]= speechesOnDate
     
  
@@ -186,12 +186,12 @@ def speechForBudgetMeasure(year, removeCapitals, stemWords, skipFirstDay):
     allBills = {}
 
     cutOffDate = hansardHandler.politicalCalandar[year]["budget"][0] # the first day of budget
-
+    print cutOffDate
 
     for bill in bills:
-        if len(bill) > 200:
-            print "\nskipped {0}\n".format(bill)
-            continue
+        # if len(bill) > 200:
+        #     print "\nskipped {0}\n".format(bill)
+        #     continue
 
         print "\n\ndoing {0}".format(bill)
         associatedSpeech = traceBill(year, year, [bill], removeCapitals, stemWords)
@@ -199,7 +199,7 @@ def speechForBudgetMeasure(year, removeCapitals, stemWords, skipFirstDay):
         # print "first date is {0} ".format(firstDetected)
         # print "cutoff date is {0}".format(cutOffDate)
         # print firstDetected<= cutOffDate
-
+        print firstDetected
         if not firstDetected:
             print "can't find a speech"
             continue
@@ -209,7 +209,7 @@ def speechForBudgetMeasure(year, removeCapitals, stemWords, skipFirstDay):
         elif not skipFirstDay and firstDetected < cutOffDate:
             print "skipping as mentioned before budget"
             continue
-
+        print "Success \n\n\n"
         associatedSpeech["firstDetected"] = firstDetected.strftime("%Y-%m-%d")
         allBills[bill] = associatedSpeech
         #print associatedSpeech
@@ -235,7 +235,29 @@ for debateDate in billTracker["speechesByDate"]:
     print debateDate
 """
 
+"""
+allBill = allBillsOnBudget(2014)
 
-# allBillsOnBudget(2014)
 
-speechForBudgetMeasure(2014, True, True, True)
+for bill in allBill:
+    if bill == "australian national preventive health agency (abolition) bill 2014":
+        print bill
+        print "\n"
+"""
+
+for i in range(2012,2016):
+    speechForBudgetMeasure(i, True, True, False)
+
+
+# print traceBill(2014, 2014, ["australian national preventive health agency (abolition) bill 2014"], True, True)
+
+
+"""
+specificDay = "/Users/jeremypattison/LargeDocument/ResearchProjectData/house_hansard/2014/2014-05-15.xml"
+
+customBills = grabBillTitles(specificDay)
+
+for customBill in customBills:
+    print customBill
+
+"""
